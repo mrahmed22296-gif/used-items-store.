@@ -1,0 +1,19 @@
+[
+  {
+    "title": "أداة منزلية",
+    "price": "25 د.ك",
+    "category": "أدوات",
+    "condition": "بحالة ممتازة",
+    "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500",
+    "whatsapp": "965XXXXXXXX"
+  },
+  {
+    "title": "منتج جديد",
+    "price": "10 د.ك",
+    "category": "أثاث",
+    "condition": "جديد",
+    "image": "رابط_الصورة",
+    "whatsapp": "965XXXXXXXX"
+  }
+]
+
