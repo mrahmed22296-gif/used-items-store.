@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سوق المنتجات المستعملة</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
+        header { background-color: #1e293b; color: white; padding: 30px 20px; text-align: center; border-bottom: 4px solid #16a34a; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); width: 300px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flexDirection: column; }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+        .badge { background-color: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; width: fit-content; margin-bottom: 10px; }
+        .price { color: #dc2626; font-weight: bold; font-size: 22px; margin: 15px 0; }
+        .btn { display: block; background: #16a34a; color: white; text-align: center; padding: 12px; text-decoration: none; border-radius: 8px; font-weight: bold; }
+        .btn:hover { background: #15803d; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 style="margin: 0 0 10px 0; font-size: 28px;">سوق المنتجات المستعملة</h1>
+        <p style="margin: 0; color: #94a3b8;">أفضل العروض والصفقات للسلع بحالة ممتازة وبأسعار تنافسية</p>
+    </header>
+
+    <div class="container">
+        <!-- منتج 1 -->
+        <div class="card">
+            <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=60" alt="منتج">
+            <div class="card-content">
+                <span class="badge">أدوات</span>
+                <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #1e293b;">أداة منزلية / جهاز فحص</h3>
+                <p style="color: #64748b; font-size: 14px; margin: 0 0 15px 0;">الحالة: بحالة ممتازة، تم الفحص والتنظيف.</p>
+                <div class="price">25 د.ك</div>
+                <a href="https://wa.me/965XXXXXXXX?text=مرحباً، أنا مهتم بشراء أداة منزلية" class="btn" target="_blank">تواصل للشراء عبر واتساب</a>
+            </div>
+        </div>
+
+        <!-- منتج 2 -->
+        <div class="card">
+            <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&auto=format&fit=crop&q=60" alt="منتج">
+            <div class="card-content">
+                <span class="badge">أثاث</span>
+                <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #1e293b;">طقم أثاث منزلي مصغر</h3>
+                <p style="color: #64748b; font-size: 14px; margin: 0 0 15px 0;">الحالة: بحالة جيدة جداً.</p>
+                <div class="price">15 د.ك</div>
+                <a href="https://wa.me/965XXXXXXXX?text=مرحباً، أنا مهتم بشراء طقم الأثاث" class="btn" target="_blank">تواصل للشراء عبر واتساب</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
