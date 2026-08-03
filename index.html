@@ -8,7 +8,7 @@
 <!-- Tailwind CSS via CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Google Font for a slightly nicer look -->
+<!-- Google Font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -35,7 +35,7 @@
     pointer-events: auto;
   }
 
-  /* Simple fade/scale for the add-product modal */
+  /* Simple fade/scale for the product modal */
   #productModal {
     transform: scale(0.95);
     opacity: 0;
@@ -142,7 +142,6 @@
 
   <!-- ============ CART DRAWER (SLIDE-OVER) ============ -->
   <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white z-50 shadow-2xl flex flex-col">
-    <!-- Cart Header -->
     <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
       <h3 class="text-lg font-bold text-slate-900">Your Cart</h3>
       <button id="closeCartBtn" class="text-slate-500 hover:text-slate-800 transition">
@@ -152,12 +151,10 @@
       </button>
     </div>
 
-    <!-- Cart Items -->
     <div id="cartItemsContainer" class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
       <!-- Injected cart items -->
     </div>
 
-    <!-- Empty state -->
     <div id="emptyCartMsg" class="hidden flex-1 flex flex-col items-center justify-center text-slate-400 px-5">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l3.6-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -166,20 +163,18 @@
       <p class="text-sm">Add some products to get started.</p>
     </div>
 
-    <!-- Cart Footer: Total + Checkout -->
     <div class="border-t border-slate-200 px-5 py-4 space-y-3">
       <div class="flex items-center justify-between text-slate-900 font-bold text-lg">
         <span>Total</span>
         <span id="cartTotal">$0.00</span>
       </div>
 
-      <!-- WhatsApp phone number input (so admin/seller number is configurable) -->
       <div>
         <label for="sellerPhoneInput" class="text-xs font-medium text-slate-500">
-          Seller WhatsApp number (with country code, no + or spaces)
+          Seller WhatsApp number
         </label>
-        <input id="sellerPhoneInput" type="text" placeholder="e.g. 15551234567"
-          class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        <input id="sellerPhoneInput" type="text" placeholder="65592534"
+          class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-100" />
       </div>
 
       <button id="checkoutBtn"
@@ -196,11 +191,11 @@
     </div>
   </aside>
 
-  <!-- ============ ADD PRODUCT MODAL ============ -->
+  <!-- ============ ADD / EDIT PRODUCT MODAL ============ -->
   <div id="productModalOverlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div id="productModal" class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-xl font-bold text-slate-900">Add New Product</h3>
+        <h3 id="modalTitle" class="text-xl font-bold text-slate-900">Add New Product</h3>
         <button id="closeProductModalBtn" class="text-slate-500 hover:text-slate-800 transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -208,34 +203,36 @@
         </button>
       </div>
 
-      <form id="addProductForm" class="space-y-4">
+      <form id="productForm" class="space-y-4">
+        <input type="hidden" id="editProductId" value="" />
+
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Product Title</label>
-          <input type="text" id="newProductTitle" required placeholder="e.g. Wireless Headphones"
+          <input type="text" id="productTitleInput" required placeholder="e.g. Wireless Headphones"
             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
-          <input type="url" id="newProductImage" required placeholder="https://example.com/image.jpg"
+          <input type="url" id="productImageInput" required placeholder="https://example.com/image.jpg"
             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
-          <textarea id="newProductDescription" required rows="3" placeholder="Short description of the product"
+          <textarea id="productDescriptionInput" required rows="3" placeholder="Short description of the product"
             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
         </div>
 
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Price (USD)</label>
-          <input type="number" id="newProductPrice" required min="0" step="0.01" placeholder="e.g. 29.99"
+          <input type="number" id="productPriceInput" required min="0" step="0.01" placeholder="e.g. 29.99"
             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
-        <button type="submit"
+        <button type="submit" id="saveProductBtn"
           class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition">
-          Add Product
+          Save Product
         </button>
       </form>
     </div>
@@ -243,19 +240,16 @@
 
   <!-- ============ TOAST NOTIFICATION ============ -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-lg shadow-lg z-[60] text-sm font-medium">
-    Item added to cart!
+    Notification text
   </div>
 
   <script>
     /* =========================================================
        DATA & STATE
        ========================================================= */
+    // Your specific phone number with international country code (Kuwait: +965)
+    const DEFAULT_SELLER_PHONE = "96565592534";
 
-    // Default seller WhatsApp number (editable in the cart drawer input,
-    // and persisted to localStorage so the seller only has to set it once).
-    const DEFAULT_SELLER_PHONE = "15551234567"; // <-- CHANGE THIS to your real number
-
-    // Dummy initial products so the page isn't empty on first load.
     const DEFAULT_PRODUCTS = [
       {
         id: "p1",
@@ -301,9 +295,8 @@
       }
     ];
 
-    // In-memory app state
     let products = [];
-    let cart = []; // [{ id, title, price, image, quantity }]
+    let cart = [];
 
     /* =========================================================
        LOCALSTORAGE HELPERS
@@ -338,15 +331,12 @@
     function init() {
       document.getElementById("year").textContent = new Date().getFullYear();
 
-      // Load products: use saved ones if present, otherwise fall back to defaults.
       products = loadFromStorage(STORAGE_KEYS.products, null) || DEFAULT_PRODUCTS;
-
-      // Load cart from localStorage (persists across page refreshes).
       cart = loadFromStorage(STORAGE_KEYS.cart, []);
 
-      // Load saved seller phone number, if any.
-      const savedPhone = loadFromStorage(STORAGE_KEYS.sellerPhone, null);
-      document.getElementById("sellerPhoneInput").value = savedPhone || DEFAULT_SELLER_PHONE;
+      // Force-set default phone number to 96565592534
+      const savedPhone = loadFromStorage(STORAGE_KEYS.sellerPhone, DEFAULT_SELLER_PHONE);
+      document.getElementById("sellerPhoneInput").value = savedPhone;
 
       renderProducts();
       renderCart();
@@ -366,14 +356,28 @@
       products.forEach((product) => {
         const card = document.createElement("div");
         card.className =
-          "bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col";
+          "bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col relative group";
 
         card.innerHTML = `
-          <div class="aspect-[4/3] w-full overflow-hidden bg-slate-100">
+          <div class="aspect-[4/3] w-full overflow-hidden bg-slate-100 relative">
             <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}"
               class="w-full h-full object-cover"
               onerror="this.onerror=null;this.src='https://placehold.co/500x375?text=No+Image';" />
+            
+            <div class="absolute top-2 right-2 flex gap-1 bg-white/90 backdrop-blur-sm p-1 rounded-lg shadow-sm">
+              <button data-id="${product.id}" class="edit-product-btn p-1.5 text-slate-600 hover:text-emerald-600 transition" title="Edit Product">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button data-id="${product.id}" class="delete-product-btn p-1.5 text-slate-600 hover:text-red-500 transition" title="Delete Product">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
           </div>
+
           <div class="p-4 flex flex-col flex-1">
             <h3 class="font-semibold text-slate-900 mb-1 line-clamp-1">${escapeHtml(product.title)}</h3>
             <p class="text-sm text-slate-500 mb-3 flex-1 line-clamp-2">${escapeHtml(product.description)}</p>
@@ -389,17 +393,105 @@
         grid.appendChild(card);
       });
 
-      // Bind "Add to Cart" buttons (re-bind every render since DOM is rebuilt)
       document.querySelectorAll(".add-to-cart-btn").forEach((btn) => {
         btn.addEventListener("click", () => addToCart(btn.dataset.id));
       });
+      document.querySelectorAll(".edit-product-btn").forEach((btn) => {
+        btn.addEventListener("click", () => openEditProductModal(btn.dataset.id));
+      });
+      document.querySelectorAll(".delete-product-btn").forEach((btn) => {
+        btn.addEventListener("click", () => deleteProduct(btn.dataset.id));
+      });
     }
 
-    // Basic HTML escaping to avoid injection issues from user-added product text
     function escapeHtml(str) {
       const div = document.createElement("div");
       div.textContent = str ?? "";
       return div.innerHTML;
+    }
+
+    /* =========================================================
+       PRODUCT EDIT & DELETE LOGIC
+       ========================================================= */
+    function openAddProductModal() {
+      document.getElementById("modalTitle").textContent = "Add New Product";
+      document.getElementById("editProductId").value = "";
+      document.getElementById("productForm").reset();
+      openProductModal();
+    }
+
+    function openEditProductModal(productId) {
+      const product = products.find((p) => p.id === productId);
+      if (!product) return;
+
+      document.getElementById("modalTitle").textContent = "Edit Product";
+      document.getElementById("editProductId").value = product.id;
+      document.getElementById("productTitleInput").value = product.title;
+      document.getElementById("productImageInput").value = product.image;
+      document.getElementById("productDescriptionInput").value = product.description;
+      document.getElementById("productPriceInput").value = product.price;
+
+      openProductModal();
+    }
+
+    function handleProductFormSubmit(e) {
+      e.preventDefault();
+
+      const editId = document.getElementById("editProductId").value;
+      const title = document.getElementById("productTitleInput").value.trim();
+      const image = document.getElementById("productImageInput").value.trim();
+      const description = document.getElementById("productDescriptionInput").value.trim();
+      const price = parseFloat(document.getElementById("productPriceInput").value);
+
+      if (!title || !image || !description || isNaN(price) || price < 0) {
+        showToast("Please fill in all fields correctly.");
+        return;
+      }
+
+      if (editId) {
+        const productIndex = products.findIndex((p) => p.id === editId);
+        if (productIndex !== -1) {
+          products[productIndex] = { id: editId, title, image, description, price };
+          showToast("Product updated successfully!");
+
+          const cartItem = cart.find((item) => item.id === editId);
+          if (cartItem) {
+            cartItem.title = title;
+            cartItem.image = image;
+            cartItem.price = price;
+            persistCart();
+            renderCart();
+          }
+        }
+      } else {
+        const newProduct = {
+          id: "p" + Date.now(),
+          title,
+          image,
+          description,
+          price
+        };
+        products.push(newProduct);
+        showToast("Product added successfully!");
+      }
+
+      saveToStorage(STORAGE_KEYS.products, products);
+      renderProducts();
+      closeProductModal();
+    }
+
+    function deleteProduct(productId) {
+      if (!confirm("Are you sure you want to delete this product?")) return;
+
+      products = products.filter((p) => p.id !== productId);
+      saveToStorage(STORAGE_KEYS.products, products);
+
+      cart = cart.filter((item) => item.id !== productId);
+      persistCart();
+
+      renderProducts();
+      renderCart();
+      showToast("Product deleted!");
     }
 
     /* =========================================================
@@ -512,7 +604,6 @@
           container.appendChild(row);
         });
 
-        // Bind quantity + remove buttons (re-bind each render)
         container.querySelectorAll(".qty-increase").forEach((btn) =>
           btn.addEventListener("click", () => updateQuantity(btn.dataset.id, 1))
         );
@@ -531,13 +622,12 @@
     function bumpBadge() {
       const badge = document.getElementById("cartCountBadge");
       badge.classList.remove("bump");
-      // Force reflow so the animation can restart
       void badge.offsetWidth;
       badge.classList.add("bump");
     }
 
     /* =========================================================
-       CART DRAWER OPEN / CLOSE
+       MODAL & DRAWER CONTROLS
        ========================================================= */
     function openCart() {
       document.getElementById("cartDrawer").classList.add("open");
@@ -551,9 +641,6 @@
       document.body.classList.remove("overflow-hidden");
     }
 
-    /* =========================================================
-       ADD PRODUCT MODAL OPEN / CLOSE
-       ========================================================= */
     function openProductModal() {
       document.getElementById("productModalOverlay").classList.add("open");
       document.body.classList.add("overflow-hidden");
@@ -562,59 +649,25 @@
     function closeProductModal() {
       document.getElementById("productModalOverlay").classList.remove("open");
       document.body.classList.remove("overflow-hidden");
-      document.getElementById("addProductForm").reset();
+      document.getElementById("productForm").reset();
+      document.getElementById("editProductId").value = "";
     }
 
     /* =========================================================
-       ADD PRODUCT FORM SUBMISSION
-       ========================================================= */
-    function handleAddProduct(e) {
-      e.preventDefault();
-
-      const title = document.getElementById("newProductTitle").value.trim();
-      const image = document.getElementById("newProductImage").value.trim();
-      const description = document.getElementById("newProductDescription").value.trim();
-      const price = parseFloat(document.getElementById("newProductPrice").value);
-
-      if (!title || !image || !description || isNaN(price) || price < 0) {
-        showToast("Please fill in all fields correctly.");
-        return;
-      }
-
-      const newProduct = {
-        id: "p" + Date.now(), // simple unique id
-        title,
-        image,
-        description,
-        price
-      };
-
-      products.push(newProduct);
-      saveToStorage(STORAGE_KEYS.products, products);
-
-      renderProducts();
-      closeProductModal();
-      showToast("Product added successfully!");
-    }
-
-    /* =========================================================
-       WHATSAPP CHECKOUT
+       WHATSAPP CHECKOUT (CONNECTED TO YOUR PHONE NUMBER)
        ========================================================= */
     function handleCheckout() {
       if (cart.length === 0) return;
 
-      const phoneInput = document.getElementById("sellerPhoneInput").value.trim();
-      const phone = phoneInput.replace(/\D/g, ""); // strip non-digits
+      let phoneInput = document.getElementById("sellerPhoneInput").value.trim();
+      let phone = phoneInput.replace(/\D/g, "");
 
       if (!phone) {
-        showToast("Please enter a valid seller WhatsApp number.");
-        return;
+        phone = DEFAULT_SELLER_PHONE;
       }
 
-      // Persist the seller's phone number for next time
       saveToStorage(STORAGE_KEYS.sellerPhone, phone);
 
-      // Build a readable order summary
       let message = "Hello! I'd like to place the following order:\n\n";
       cart.forEach((item, index) => {
         message += `${index + 1}. ${item.title} — Qty: ${item.quantity} — $${(item.price * item.quantity).toFixed(2)}\n`;
@@ -644,25 +697,24 @@
     }
 
     /* =========================================================
-       EVENT BINDING (one-time listeners on static elements)
+       EVENT BINDING
        ========================================================= */
     function bindEvents() {
       document.getElementById("openCartBtn").addEventListener("click", openCart);
       document.getElementById("closeCartBtn").addEventListener("click", closeCart);
       document.getElementById("overlay").addEventListener("click", closeCart);
 
-      document.getElementById("openAddProductBtn").addEventListener("click", openProductModal);
-      document.getElementById("openAddProductBtnMobile").addEventListener("click", openProductModal);
+      document.getElementById("openAddProductBtn").addEventListener("click", openAddProductModal);
+      document.getElementById("openAddProductBtnMobile").addEventListener("click", openAddProductModal);
       document.getElementById("closeProductModalBtn").addEventListener("click", closeProductModal);
       document.getElementById("productModalOverlay").addEventListener("click", (e) => {
         if (e.target.id === "productModalOverlay") closeProductModal();
       });
 
-      document.getElementById("addProductForm").addEventListener("submit", handleAddProduct);
+      document.getElementById("productForm").addEventListener("submit", handleProductFormSubmit);
       document.getElementById("checkoutBtn").addEventListener("click", handleCheckout);
       document.getElementById("clearCartBtn").addEventListener("click", clearCart);
 
-      // Close drawer/modal with Escape key
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           closeCart();
@@ -671,7 +723,6 @@
       });
     }
 
-    // Kick everything off once the DOM is ready
     document.addEventListener("DOMContentLoaded", init);
   </script>
 </body>
