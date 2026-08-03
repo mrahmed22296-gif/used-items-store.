@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,14 +10,14 @@
 
 <!-- Google Font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-  body { font-family: 'Inter', sans-serif; }
+  body { font-family: 'Cairo', 'Inter', sans-serif; }
 
   /* Smooth slide-over transition for the cart drawer */
   #cartDrawer {
-    transform: translateX(100%);
+    transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
   }
   #cartDrawer.open {
@@ -25,23 +25,23 @@
   }
 
   /* Overlay fade */
-  #overlay, #productModalOverlay, #adminLoginOverlay {
+  #overlay, #productModalOverlay, #adminLoginOverlay, #productDetailsOverlay {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease-in-out;
   }
-  #overlay.open, #productModalOverlay.open, #adminLoginOverlay.open {
+  #overlay.open, #productModalOverlay.open, #adminLoginOverlay.open, #productDetailsOverlay.open {
     opacity: 1;
     pointer-events: auto;
   }
 
   /* Simple fade/scale for modals */
-  #productModal, #adminLoginModal {
+  #productModal, #adminLoginModal, #productDetailsModal {
     transform: scale(0.95);
     opacity: 0;
     transition: all 0.2s ease-in-out;
   }
-  #productModalOverlay.open #productModal, #adminLoginOverlay.open #adminLoginModal {
+  #productModalOverlay.open #productModal, #adminLoginOverlay.open #adminLoginModal, #productDetailsOverlay.open #productDetailsModal {
     transform: scale(1);
     opacity: 1;
   }
@@ -78,10 +78,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <div class="bg-emerald-600 text-white w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-lg">S</div>
-        <span class="text-xl font-extrabold tracking-tight text-slate-900">ShopEasy</span>
+        <span class="text-xl font-extrabold tracking-tight text-slate-900">ShopEasy / تسوق بسهولة</span>
         <!-- شارة الأدمن تظهر عند تسجيل الدخول -->
         <span id="adminBadge" class="hidden text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-full border border-amber-300">
-          Admin Mode
+          وضع المسؤول / Admin Mode
         </span>
       </div>
 
@@ -92,7 +92,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          Add Product
+          إضافة منتج / Add Product
         </button>
 
         <!-- Cart Button (يظهر للجميع) -->
@@ -101,7 +101,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l3.6-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
           <span id="cartCountBadge"
-            class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+            class="absolute -top-2 -left-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
         </button>
       </div>
     </div>
@@ -110,9 +110,9 @@
   <!-- ============ HERO ============ -->
   <section class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-14 text-center">
-      <h1 class="text-3xl sm:text-4xl font-extrabold mb-3">Quality Products, Straight to Your Chat</h1>
+      <h1 class="text-3xl sm:text-4xl font-extrabold mb-3">منتجات عالية الجودة، مباشرة إلى محادثتك / Quality Products, Straight to Your Chat</h1>
       <p class="text-emerald-50 max-w-xl mx-auto">
-        Browse our catalog, add items to your cart, and check out instantly via WhatsApp — no account needed.
+        تصفح كتالوج المنتجات، أضف السلع إلى السلة، وأكمل الطلب مباشرة عبر الواتساب بدون حساب.
       </p>
     </div>
   </section>
@@ -120,7 +120,7 @@
   <!-- ============ PRODUCT GRID ============ -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold text-slate-900">Our Products</h2>
+      <h2 class="text-2xl font-bold text-slate-900">منتجاتنا / Our Products</h2>
       <span id="productCountLabel" class="text-sm text-slate-500"></span>
     </div>
 
@@ -134,11 +134,11 @@
     <p class="text-sm">&copy; <span id="year"></span> ShopEasy. Built with ❤️ .</p>
     
     <!-- زر التحكم في وضع الأدمن في الفوتر -->
-    <button id="adminToggleBtn" class="absolute right-4 bottom-4 text-xs text-slate-500 hover:text-white transition flex items-center gap-1">
+    <button id="adminToggleBtn" class="absolute left-4 bottom-4 text-xs text-slate-500 hover:text-white transition flex items-center gap-1">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
       </svg>
-      <span id="adminToggleText">Admin Login</span>
+      <span id="adminToggleText">تسجيل دخول الأدمن / Admin Login</span>
     </button>
   </footer>
 
@@ -146,9 +146,9 @@
   <div id="overlay" class="fixed inset-0 bg-black/50 z-40"></div>
 
   <!-- ============ CART DRAWER ============ -->
-  <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white z-50 shadow-2xl flex flex-col">
+  <aside id="cartDrawer" class="fixed top-0 left-0 h-full w-full sm:w-96 bg-white z-50 shadow-2xl flex flex-col">
     <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-      <h3 class="text-lg font-bold text-slate-900">Your Cart</h3>
+      <h3 class="text-lg font-bold text-slate-900">سلة التسوق / Your Cart</h3>
       <button id="closeCartBtn" class="text-slate-500 hover:text-slate-800 transition">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -164,14 +164,14 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l3.6-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
       </svg>
-      <p class="font-medium">Your cart is empty</p>
-      <p class="text-sm">Add some products to get started.</p>
+      <p class="font-medium">السلة فارغة / Your cart is empty</p>
+      <p class="text-sm">أضف بعض المنتجات للبدء / Add some products to get started.</p>
     </div>
 
     <div class="border-t border-slate-200 px-5 py-4 space-y-3">
       <div class="flex items-center justify-between text-slate-900 font-bold text-lg">
-        <span>Total</span>
-        <span id="cartTotal">$0.00</span>
+        <span>الإجمالي / Total</span>
+        <span id="cartTotal">0.00 د.ك</span>
       </div>
 
       <button id="checkoutBtn"
@@ -180,10 +180,10 @@
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-1.746-.873-2.888-1.558-4.035-3.53-.305-.526.305-.489.874-1.627.098-.198.049-.372-.05-.52-.099-.15-.669-1.611-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.017-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.05 3.132 4.977 4.27 2.928 1.14 2.928.759 3.849.65.918-.109 2.006-.767 2.269-1.51.264-.744.264-1.376.185-1.51-.079-.132-.298-.198-.594-.347z"/>
           <path d="M12.004 2.003c-5.514 0-9.997 4.483-9.997 9.997 0 1.762.464 3.417 1.276 4.851L2.05 22l5.271-1.383a9.94 9.94 0 0 0 4.683 1.188c5.514 0 9.997-4.483 9.997-9.997 0-5.514-4.483-9.997-9.997-9.997zm0 18.033a8.02 8.02 0 0 1-4.115-1.14l-.294-.174-3.06.803.818-2.986-.191-.307a8.036 8.036 0 0 1-1.231-4.232c0-4.436 3.61-8.046 8.046-8.046 4.436 0 8.046 3.61 8.046 8.046 0 4.436-3.61 8.046-8.019 8.036z"/>
         </svg>
-        Checkout via WhatsApp
+        الشراء عبر واتساب / Checkout via WhatsApp
       </button>
       <button id="clearCartBtn" class="w-full text-center text-sm text-slate-400 hover:text-red-500 transition">
-        Clear cart
+        تفريغ السلة / Clear cart
       </button>
     </div>
   </aside>
@@ -191,23 +191,64 @@
   <!-- ============ ADMIN LOGIN MODAL ============ -->
   <div id="adminLoginOverlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div id="adminLoginModal" class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-      <h3 class="text-xl font-bold text-slate-900 mb-2">Admin Login</h3>
-      <p class="text-sm text-slate-500 mb-4">Enter password to manage products. (Default: <code class="bg-slate-100 px-1 py-0.5 rounded text-emerald-600 font-bold">admin123</code>)</p>
+      <h3 class="text-xl font-bold text-slate-900 mb-2">تسجيل دخول المسؤول / Admin Login</h3>
+      <p class="text-sm text-slate-500 mb-4">أدخل كلمة المرور لإدارة المنتجات. (الافتراضية: <code class="bg-slate-100 px-1 py-0.5 rounded text-emerald-600 font-bold">@Hmedx1990</code>)</p>
       
       <form id="adminLoginForm" class="space-y-4">
         <div>
-          <input type="password" id="adminPasswordInput" required placeholder="Enter Admin Password"
+          <input type="password" id="adminPasswordInput" required placeholder="أدخل كلمة المرور"
             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
         <div class="flex gap-2">
           <button type="button" id="closeAdminModalBtn" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-lg transition">
-            Cancel
+            إلغاء / Cancel
           </button>
           <button type="submit" class="w-1/2 bg-slate-900 hover:bg-slate-700 text-white font-semibold py-2 rounded-lg transition">
-            Login
+            دخول / Login
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ============ PRODUCT DETAILS MODAL (صفحة تفاصيل المنتج) ============ -->
+  <div id="productDetailsOverlay" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div id="productDetailsModal" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8">
+      <div class="flex items-center justify-between p-4 border-b border-slate-100">
+        <h3 id="detailTitle" class="text-xl font-bold text-slate-900">تفاصيل المنتج</h3>
+        <button id="closeProductDetailsBtn" class="text-slate-500 hover:text-slate-800 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+        <!-- الصورة الرئيسية -->
+        <div class="w-full h-72 sm:h-80 bg-slate-100 rounded-xl overflow-hidden">
+          <img id="detailMainImage" src="" alt="" class="w-full h-full object-cover" />
+        </div>
+        
+        <!-- معرض الصور المصغرة -->
+        <div>
+          <p class="text-xs font-semibold text-slate-400 mb-2">صور المنتج / Product Gallery</p>
+          <div id="detailGallery" class="flex gap-2 overflow-x-auto pb-2">
+            <!-- Injected Gallery Images -->
+          </div>
+        </div>
+
+        <!-- معلومات المنتج والوصف -->
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span id="detailPrice" class="text-2xl font-extrabold text-emerald-600"></span>
+          </div>
+          <p id="detailDescription" class="text-slate-600 text-base leading-relaxed whitespace-pre-line"></p>
+        </div>
+      </div>
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+        <button id="detailAddToCartBtn" class="flex-1 bg-slate-900 hover:bg-emerald-600 text-white font-bold py-3 rounded-lg transition">
+          إضافة إلى السلة / Add to Cart
+        </button>
+      </div>
     </div>
   </div>
 
@@ -215,7 +256,7 @@
   <div id="productModalOverlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div id="productModal" class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-4">
-        <h3 id="modalTitle" class="text-xl font-bold text-slate-900">Add New Product</h3>
+        <h3 id="modalTitle" class="text-xl font-bold text-slate-900">إضافة منتج جديد / Add New Product</h3>
         <button id="closeProductModalBtn" class="text-slate-500 hover:text-slate-800 transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -227,32 +268,38 @@
         <input type="hidden" id="editProductId" value="" />
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Product Title</label>
-          <input type="text" id="productTitleInput" required placeholder="e.g. Wireless Headphones"
+          <label class="block text-sm font-medium text-slate-700 mb-1">اسم المنتج / Product Title</label>
+          <input type="text" id="productTitleInput" required placeholder="مثال: سماعات لاسلكية"
             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">رابط الصورة الرئيسية / Main Image URL</label>
           <input type="url" id="productImageInput" required placeholder="https://example.com/image.jpg"
             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
-          <textarea id="productDescriptionInput" required rows="3" placeholder="Short description of the product"
+          <label class="block text-sm font-medium text-slate-700 mb-1">روابط الصور الإضافية (مفصولة بفواصل) / Additional Images</label>
+          <input type="text" id="productGalleryInput" placeholder="https://ex.com/1.jpg, https://ex.com/2.jpg"
+            class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">الوصف / Description</label>
+          <textarea id="productDescriptionInput" required rows="3" placeholder="وصف المنتج..."
             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Price (USD)</label>
-          <input type="number" id="productPriceInput" required min="0" step="0.01" placeholder="e.g. 29.99"
+          <label class="block text-sm font-medium text-slate-700 mb-1">السعر بالدينار (KWD)</label>
+          <input type="number" id="productPriceInput" required min="0" step="0.01" placeholder="مثال: 18.50"
             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
         <button type="submit" id="saveProductBtn"
           class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition">
-          Save Product
+          حفظ المنتج / Save Product
         </button>
       </form>
     </div>
@@ -273,30 +320,43 @@
     const DEFAULT_PRODUCTS = [
       {
         id: "p1",
-        title: "Classic Leather Backpack",
-        description: "Durable, water-resistant backpack with laptop compartment. Perfect for daily commutes.",
-        price: 59.99,
-        image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&q=80"
+        title: "حقيبة ظهر كلاسيكية من الجلد / Classic Leather Backpack",
+        description: "حقيبة ظهر متينة ومقاومة للماء تحتوي على جيب مخصص للكمبيوتر المحمول. مثالية للاستخدام اليومي والتنقلات.",
+        price: 18.50,
+        image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&q=80",
+        images: [
+          "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&q=80",
+          "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&q=80"
+        ]
       },
       {
         id: "p2",
-        title: "Wireless Bluetooth Headphones",
-        description: "Over-ear headphones with active noise cancellation and 30-hour battery life.",
-        price: 89.5,
-        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80"
+        title: "سماعات بلوتوث لاسلكية / Wireless Bluetooth Headphones",
+        description: "سماعات رأس تحيط بالأذن مع تقنية إلغاء الضوضاء النشطة وعمر بطارية يدوم حتى 30 ساعة متواصلة.",
+        price: 27.00,
+        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
+        images: [
+          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
+          "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=500&q=80"
+        ]
       },
       {
         id: "p3",
-        title: "Minimalist Analog Watch",
-        description: "Sleek stainless steel watch with a genuine leather strap. Water resistant up to 30m.",
-        price: 45.0,
-        image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=500&q=80"
+        title: "ساعة يد كلاسيكية أنيقة / Minimalist Analog Watch",
+        description: "ساعة أنيقة من الفولاذ المقاوم للصدأ مع سوار من الجلد الطبيعي. مقاومة للماء حتى عمق 30 متراً.",
+        price: 13.90,
+        image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=500&q=80",
+        images: [
+          "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=500&q=80",
+          "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80"
+        ]
       }
     ];
 
     let products = [];
     let cart = [];
     let isAdmin = false;
+    let selectedProductId = null;
 
     const STORAGE_KEYS = {
       cart: "shopeasy_cart",
@@ -343,11 +403,11 @@
       if (isAdmin) {
         adminElements.forEach(el => el.classList.remove("hidden"));
         adminBadge.classList.remove("hidden");
-        adminToggleText.textContent = "Admin Logout";
+        adminToggleText.textContent = "خروج الأدمن / Admin Logout";
       } else {
         adminElements.forEach(el => el.classList.add("hidden"));
         adminBadge.classList.add("hidden");
-        adminToggleText.textContent = "Admin Login";
+        adminToggleText.textContent = "تسجيل دخول الأدمن / Admin Login";
       }
     }
 
@@ -356,7 +416,7 @@
         isAdmin = false;
         updateAdminUI();
         renderProducts();
-        showToast("Logged out from Admin mode");
+        showToast("تم تسجيل الخروج من وضع الأدمن");
       } else {
         document.getElementById("adminLoginOverlay").classList.add("open");
         document.getElementById("adminPasswordInput").focus();
@@ -364,23 +424,23 @@
     }
 
     /* =========================================================
-       PRODUCT RENDERING
+       PRODUCT RENDERING & DETAILS MODAL
        ========================================================= */
     function renderProducts() {
       const grid = document.getElementById("productGrid");
       grid.innerHTML = "";
 
       document.getElementById("productCountLabel").textContent =
-        products.length + (products.length === 1 ? " item" : " items");
+        products.length + (products.length === 1 ? " منتج" : " منتجات");
 
       products.forEach((product) => {
         const card = document.createElement("div");
         card.className =
-          "bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col relative group";
+          "bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col relative group cursor-pointer";
 
         // أدوات التعديل والحذف تظهر فقط للأدمن
         const adminControls = isAdmin ? `
-          <div class="absolute top-2 right-2 flex gap-1 bg-white/90 backdrop-blur-sm p-1 rounded-lg shadow-sm z-10">
+          <div class="absolute top-2 left-2 flex gap-1 bg-white/90 backdrop-blur-sm p-1 rounded-lg shadow-sm z-10">
             <button data-id="${product.id}" class="edit-product-btn p-1.5 text-slate-600 hover:text-emerald-600 transition" title="Edit Product">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -395,21 +455,21 @@
         ` : '';
 
         card.innerHTML = `
-          <div class="aspect-[4/3] w-full overflow-hidden bg-slate-100 relative">
+          <div class="aspect-[4/3] w-full overflow-hidden bg-slate-100 relative product-card-click" data-id="${product.id}">
             <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}"
-              class="w-full h-full object-cover"
+              class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
               onerror="this.onerror=null;this.src='https://placehold.co/500x375?text=No+Image';" />
             ${adminControls}
           </div>
 
           <div class="p-4 flex flex-col flex-1">
-            <h3 class="font-semibold text-slate-900 mb-1 line-clamp-1">${escapeHtml(product.title)}</h3>
-            <p class="text-sm text-slate-500 mb-3 flex-1 line-clamp-2">${escapeHtml(product.description)}</p>
+            <h3 class="font-semibold text-slate-900 mb-1 line-clamp-1 product-card-click" data-id="${product.id}">${escapeHtml(product.title)}</h3>
+            <p class="text-sm text-slate-500 mb-3 flex-1 line-clamp-2 product-card-click" data-id="${product.id}">${escapeHtml(product.description)}</p>
             <div class="flex items-center justify-between mt-auto">
-              <span class="text-lg font-bold text-emerald-600">$${Number(product.price).toFixed(2)}</span>
+              <span class="text-lg font-bold text-emerald-600">${Number(product.price).toFixed(2)} د.ك</span>
               <button data-id="${product.id}"
-                class="add-to-cart-btn bg-slate-900 hover:bg-emerald-600 text-white text-sm font-semibold px-3 py-2 rounded-lg transition">
-                Add to Cart
+                class="add-to-cart-btn bg-slate-900 hover:bg-emerald-600 text-white text-sm font-semibold px-3 py-2 rounded-lg transition z-10">
+                أضف للسلة
               </button>
             </div>
           </div>
@@ -417,18 +477,70 @@
         grid.appendChild(card);
       });
 
+      // الضغط على البطاقة لفتح تفاصيل المنتج
+      document.querySelectorAll(".product-card-click").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          if (!e.target.closest('.edit-product-btn') && !e.target.closest('.delete-product-btn')) {
+            openProductDetailsModal(el.dataset.id);
+          }
+        });
+      });
+
       document.querySelectorAll(".add-to-cart-btn").forEach((btn) => {
-        btn.addEventListener("click", () => addToCart(btn.dataset.id));
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          addToCart(btn.dataset.id);
+        });
       });
 
       if (isAdmin) {
         document.querySelectorAll(".edit-product-btn").forEach((btn) => {
-          btn.addEventListener("click", () => openEditProductModal(btn.dataset.id));
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openEditProductModal(btn.dataset.id);
+          });
         });
         document.querySelectorAll(".delete-product-btn").forEach((btn) => {
-          btn.addEventListener("click", () => deleteProduct(btn.dataset.id));
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            deleteProduct(btn.dataset.id);
+          });
         });
       }
+    }
+
+    function openProductDetailsModal(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      selectedProductId = productId;
+      document.getElementById("detailTitle").textContent = product.title;
+      document.getElementById("detailDescription").textContent = product.description;
+      document.getElementById("detailPrice").textContent = `${Number(product.price).toFixed(2)} د.ك`;
+      
+      const mainImg = document.getElementById("detailMainImage");
+      mainImg.src = product.image;
+
+      const gallery = document.getElementById("detailGallery");
+      gallery.innerHTML = "";
+
+      const allImages = [product.image, ...(product.images || [])];
+      const uniqueImages = [...new Set(allImages)];
+
+      uniqueImages.forEach((imgUrl) => {
+        const thumb = document.createElement("img");
+        thumb.src = imgUrl;
+        thumb.className = "w-16 h-16 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-emerald-500 transition";
+        thumb.onclick = () => { mainImg.src = imgUrl; };
+        gallery.appendChild(thumb);
+      });
+
+      document.getElementById("productDetailsOverlay").classList.add("open");
+    }
+
+    function closeProductDetailsModal() {
+      document.getElementById("productDetailsOverlay").classList.remove("open");
+      selectedProductId = null;
     }
 
     function escapeHtml(str) {
@@ -442,7 +554,7 @@
        ========================================================= */
     function openAddProductModal() {
       if (!isAdmin) return;
-      document.getElementById("modalTitle").textContent = "Add New Product";
+      document.getElementById("modalTitle").textContent = "إضافة منتج جديد / Add New Product";
       document.getElementById("editProductId").value = "";
       document.getElementById("productForm").reset();
       openProductModal();
@@ -453,10 +565,11 @@
       const product = products.find((p) => p.id === productId);
       if (!product) return;
 
-      document.getElementById("modalTitle").textContent = "Edit Product";
+      document.getElementById("modalTitle").textContent = "تعديل المنتج / Edit Product";
       document.getElementById("editProductId").value = product.id;
       document.getElementById("productTitleInput").value = product.title;
       document.getElementById("productImageInput").value = product.image;
+      document.getElementById("productGalleryInput").value = product.images ? product.images.join(", ") : "";
       document.getElementById("productDescriptionInput").value = product.description;
       document.getElementById("productPriceInput").value = product.price;
 
@@ -470,24 +583,27 @@
       const editId = document.getElementById("editProductId").value;
       const title = document.getElementById("productTitleInput").value.trim();
       const image = document.getElementById("productImageInput").value.trim();
+      const galleryRaw = document.getElementById("productGalleryInput").value.trim();
       const description = document.getElementById("productDescriptionInput").value.trim();
       const price = parseFloat(document.getElementById("productPriceInput").value);
 
+      const images = galleryRaw ? galleryRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+
       if (!title || !image || !description || isNaN(price) || price < 0) {
-        showToast("Please fill in all fields correctly.");
+        showToast("يرجى ملء جميع الحقول بشكل صحيح.");
         return;
       }
 
       if (editId) {
         const productIndex = products.findIndex((p) => p.id === editId);
         if (productIndex !== -1) {
-          products[productIndex] = { id: editId, title, image, description, price };
-          showToast("Product updated successfully!");
+          products[productIndex] = { id: editId, title, image, images, description, price };
+          showToast("تم تحديث المنتج بنجاح!");
         }
       } else {
-        const newProduct = { id: "p" + Date.now(), title, image, description, price };
+        const newProduct = { id: "p" + Date.now(), title, image, images, description, price };
         products.push(newProduct);
-        showToast("Product added successfully!");
+        showToast("تم إضافة المنتج بنجاح!");
       }
 
       saveToStorage(STORAGE_KEYS.products, products);
@@ -497,7 +613,7 @@
 
     function deleteProduct(productId) {
       if (!isAdmin) return;
-      if (!confirm("Are you sure you want to delete this product?")) return;
+      if (!confirm("هل أنت تأكد من رغبتك في حذف هذا المنتج؟")) return;
 
       products = products.filter((p) => p.id !== productId);
       saveToStorage(STORAGE_KEYS.products, products);
@@ -506,7 +622,7 @@
       saveToStorage(STORAGE_KEYS.cart, cart);
       renderProducts();
       renderCart();
-      showToast("Product deleted!");
+      showToast("تم حذف المنتج!");
     }
 
     /* =========================================================
@@ -525,7 +641,7 @@
 
       saveToStorage(STORAGE_KEYS.cart, cart);
       renderCart();
-      showToast(`${product.title} added to cart!`);
+      showToast(`تم إضافة ${product.title} إلى السلة!`);
       bumpBadge();
     }
 
@@ -589,7 +705,7 @@
               class="w-16 h-16 rounded-lg object-cover bg-slate-100 flex-shrink-0" />
             <div class="flex-1 min-w-0">
               <p class="text-sm font-semibold text-slate-900 line-clamp-1">${escapeHtml(item.title)}</p>
-              <p class="text-sm text-emerald-600 font-medium">$${item.price.toFixed(2)}</p>
+              <p class="text-sm text-emerald-600 font-medium">${item.price.toFixed(2)} د.ك</p>
               <div class="flex items-center gap-2 mt-1">
                 <button class="qty-decrease w-6 h-6 flex items-center justify-center rounded bg-slate-100 hover:bg-slate-200 text-slate-700" data-id="${item.id}">−</button>
                 <span class="text-sm font-medium w-6 text-center">${item.quantity}</span>
@@ -616,7 +732,7 @@
         );
       }
 
-      document.getElementById("cartTotal").textContent = `$${getCartTotal().toFixed(2)}`;
+      document.getElementById("cartTotal").textContent = `${getCartTotal().toFixed(2)} د.ك`;
       document.getElementById("cartCountBadge").textContent = getCartItemCount();
     }
 
@@ -633,12 +749,12 @@
     function handleCheckout() {
       if (cart.length === 0) return;
 
-      let message = "Hello! I'd like to place the following order:\n\n";
+      let message = "مرحباً! أود تقديم الطلب التالي:\n\n";
       cart.forEach((item, index) => {
-        message += `${index + 1}. ${item.title} — Qty: ${item.quantity} — $${(item.price * item.quantity).toFixed(2)}\n`;
+        message += `${index + 1}. ${item.title} — الكمية: ${item.quantity} — ${ (item.price * item.quantity).toFixed(2) } د.ك\n`;
       });
-      message += `\nTotal: $${getCartTotal().toFixed(2)}`;
-      message += "\n\nPlease confirm availability and next steps. Thank you!";
+      message += `\nالإجمالي: ${getCartTotal().toFixed(2)} د.ك`;
+      message += "\n\nيرجى تأكيد التوفر وخطوات الاستلام. شكراً لك!";
 
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${SELLER_PHONE}?text=${encodedMessage}`;
@@ -697,6 +813,14 @@
       document.getElementById("openAddProductBtn").addEventListener("click", openAddProductModal);
       document.getElementById("closeProductModalBtn").addEventListener("click", closeProductModal);
       
+      document.getElementById("closeProductDetailsBtn").addEventListener("click", closeProductDetailsModal);
+      document.getElementById("detailAddToCartBtn").addEventListener("click", () => {
+        if (selectedProductId) {
+          addToCart(selectedProductId);
+          closeProductDetailsModal();
+        }
+      });
+
       document.getElementById("productForm").addEventListener("submit", handleProductFormSubmit);
       document.getElementById("checkoutBtn").addEventListener("click", handleCheckout);
       document.getElementById("clearCartBtn").addEventListener("click", clearCart);
@@ -713,9 +837,9 @@
           updateAdminUI();
           renderProducts();
           closeAdminModal();
-          showToast("Admin access granted!");
+          showToast("تم تسجيل الدخول بصلاحية أدمن!");
         } else {
-          showToast("Incorrect Password!");
+          showToast("كلمة المرور غير صحيحة!");
         }
       });
     }
