@@ -3,6 +3,7 @@ const { GoogleGenAI } = require('@google/genai');
 const express = require('express');
 const cors = require('cors');
 const pino = require('pino');
+const path = require('path');
 
 require('dotenv').config();
 
@@ -10,9 +11,14 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// تقديم الملفات الثابتة (مثل index.html إذا وضعتها في مجلد public)
-app.use(express.static('public'));
+// خدمة الملفات الثابتة وتوجيه الصفحة الرئيسية لملف index.html مباشرة
+app.use(express.static(path.join(__dirname)));
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// تمرير مفتاح Gemini بشكل صريح ومباشر
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 let sock;
@@ -90,7 +96,7 @@ async function connectToWhatsApp() {
     }
 }
 
-// نقطة النهاية (API) التي يتصل بها ملف index.html لجلب الحالة والـ QR
+// نقطة النهاية (API) لجلب الحالة والـ QR للواجهة الأمامية
 app.get('/api/status', (req, res) => {
     res.json({
         status: connectionStatus,
