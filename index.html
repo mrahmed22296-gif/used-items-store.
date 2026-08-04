@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة روبوت الرد الآلي للواتساب</title>
-    <!-- مكتبة لترجمة نص الـ QR إلى صورة باركود مرئية -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <style>
         body {
@@ -55,9 +54,7 @@
             align-items: center;
             justify-content: center;
         }
-        canvas {
-            max-width: 100%;
-        }
+        canvas { max-width: 100%; }
     </style>
 </head>
 <body>
@@ -66,11 +63,11 @@
         <h2>🤖 روبوت واتساب بالذكاء الاصطناعي</h2>
         
         <div id="status" class="status-box disconnected">
-            حالة الاتصال: جاري التحقق...
+            حالة الاتصال: جاري الاتصال بالخادم...
         </div>
 
         <div id="qr-container">
-            <p id="qr-text">جاري جلب رمز الـ QR...</p>
+            <p id="qr-text">يرجى الانتظار...</p>
             <canvas id="qr-canvas"></canvas>
         </div>
 
@@ -85,8 +82,18 @@
             const qrText = document.getElementById('qr-text');
             const canvas = document.getElementById('qr-canvas');
 
+            statusDiv.className = 'status-box disconnected';
+            statusDiv.innerText = 'حالة الاتصال: جاري التحقق...';
+
             try {
-                const response = await fetch(`${BACKEND_URL}/api/status`);
+                const response = await fetch(`${BACKEND_URL}/api/status`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) throw new Error('استجابة غير صحيحة من الخادم');
+
                 const data = await response.json();
                 
                 if (data.status === 'CONNECTED') {
@@ -100,21 +107,23 @@
                     
                     if (data.qr) {
                         qrText.innerText = 'امسح الرمز أدناه من تطبيق واتساب:';
+                        canvas.style.display = 'block';
                         QRCode.toCanvas(canvas, data.qr, { width: 220 }, function (error) {
                             if (error) console.error(error);
                         });
                     } else {
-                        qrText.innerText = 'جاري توليد رمز الـ QR من الخادم، انتظر قليلاً...';
+                        qrText.innerText = 'الخادم يعمل، جاري توليد رمز الـ QR...';
+                        canvas.style.display = 'none';
                     }
                 }
             } catch (error) {
                 statusDiv.className = 'status-box disconnected';
                 statusDiv.innerText = 'حالة الاتصال: خطأ في الاتصال بالخادم ❌';
+                qrText.innerText = 'تأكد من عمل الخادم على Render أو اضغط تحديث.';
                 console.error('خطأ:', error);
             }
         }
 
-        setInterval(checkStatus, 5000);
         checkStatus();
     </script>
 
