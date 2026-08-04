@@ -1,977 +1,162 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="htmlRoot">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ShopEasy — Storefront</title>
-
-<!-- Tailwind CSS via CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Google Font -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-<style>
-  body { font-family: 'Cairo', 'Inter', sans-serif; }
-
-  /* Smooth slide-over transition for the cart drawer */
-  #cartDrawer {
-    transition: transform 0.3s ease-in-out;
-  }
-  html[dir="rtl"] #cartDrawer { transform: translateX(-100%); }
-  html[dir="ltr"] #cartDrawer { transform: translateX(100%); }
-  
-  html[dir="rtl"] #cartDrawer.open, html[dir="ltr"] #cartDrawer.open {
-    transform: translateX(0);
-  }
-
-  /* Overlay fade */
-  #overlay, #productModalOverlay, #adminLoginOverlay, #productDetailsOverlay {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease-in-out;
-  }
-  #overlay.open, #productModalOverlay.open, #adminLoginOverlay.open, #productDetailsOverlay.open {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  /* Simple fade/scale for modals */
-  #productModal, #adminLoginModal, #productDetailsModal {
-    transform: scale(0.95);
-    opacity: 0;
-    transition: all 0.2s ease-in-out;
-  }
-  #productModalOverlay.open #productModal, #adminLoginOverlay.open #adminLoginModal, #productDetailsOverlay.open #productDetailsModal {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  /* Custom scrollbar for cart items */
-  #cartItemsContainer::-webkit-scrollbar { width: 6px; }
-  #cartItemsContainer::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-  /* Little bounce for the cart badge */
-  @keyframes bump {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.35); }
-    100% { transform: scale(1); }
-  }
-  .bump { animation: bump 0.25s ease-in-out; }
-
-  /* Toast notification */
-  #toast {
-    transform: translateY(20px);
-    opacity: 0;
-    transition: all 0.3s ease-in-out;
-  }
-  #toast.show {
-    transform: translateY(0);
-    opacity: 1;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظومة إدارة واهلاك الأصول الثابتة</title>
+    <!-- استدعاء Tailwind CSS للتصميم السريع والعصري -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
 </head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
 
-<body class="bg-slate-50 text-slate-800">
-
-  <!-- ============ HEADER / NAVBAR ============ -->
-  <header class="bg-white shadow-sm sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="bg-emerald-600 text-white w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-lg">S</div>
-        <span class="text-xl font-extrabold tracking-tight text-slate-900">ShopEasy</span>
-        <!-- شارة الأدمن تظهر عند تسجيل الدخول -->
-        <span id="adminBadge" class="hidden text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-full border border-amber-300" data-i18n="adminBadge">
-          وضع المسؤول
-        </span>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <!-- زر تغيير اللغة -->
-        <button id="langToggleBtn" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-semibold transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-          </svg>
-          <span id="langLabel">English</span>
-        </button>
-
-        <!-- أزرار الإضافة تظهر للأدمن فقط بواسطة JS -->
-        <button id="openAddProductBtn"
-          class="admin-only hidden items-center gap-1 bg-slate-900 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          <span data-i18n="addProduct">إضافة منتج</span>
-        </button>
-
-        <!-- Cart Button (يظهر للجميع) -->
-        <button id="openCartBtn" class="relative inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white w-10 h-10 rounded-lg transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l3.6-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          <span id="cartCountBadge"
-            class="absolute -top-2 -left-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- ============ HERO ============ -->
-  <section class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-14 text-center">
-      <h1 class="text-3xl sm:text-4xl font-extrabold mb-3" data-i18n="heroTitle">منتجات عالية الجودة، مباشرة إلى محادثتك</h1>
-      <p class="text-emerald-50 max-w-xl mx-auto" data-i18n="heroSub">
-        تصفح كتالوج المنتجات، أضف السلع إلى السلة، وأكمل الطلب مباشرة عبر الواتساب بدون حساب.
-      </p>
-    </div>
-  </section>
-
-  <!-- ============ PRODUCT GRID ============ -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold text-slate-900" data-i18n="ourProducts">منتجاتنا</h2>
-      <span id="productCountLabel" class="text-sm text-slate-500"></span>
-    </div>
-
-    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <!-- Injected by JS -->
-    </div>
-  </main>
-
-  <!-- ============ FOOTER ============ -->
-  <footer class="bg-slate-900 text-slate-300 text-center py-6 mt-10 relative">
-    <p class="text-sm">&copy; <span id="year"></span> ShopEasy. Built with ❤️ .</p>
-    
-    <!-- زر التحكم في وضع الأدمن في الفوتر -->
-    <button id="adminToggleBtn" class="absolute ltr:right-4 rtl:left-4 bottom-4 text-xs text-slate-500 hover:text-white transition flex items-center gap-1">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-      </svg>
-      <span id="adminToggleText" data-i18n="adminLogin">تسجيل دخول الأدمن</span>
-    </button>
-  </footer>
-
-  <!-- ============ CART OVERLAY ============ -->
-  <div id="overlay" class="fixed inset-0 bg-black/50 z-40"></div>
-
-  <!-- ============ CART DRAWER ============ -->
-  <aside id="cartDrawer" class="fixed top-0 ltr:right-0 rtl:left-0 h-full w-full sm:w-96 bg-white z-50 shadow-2xl flex flex-col">
-    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-      <h3 class="text-lg font-bold text-slate-900" data-i18n="yourCart">سلة التسوق</h3>
-      <button id="closeCartBtn" class="text-slate-500 hover:text-slate-800 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-
-    <div id="cartItemsContainer" class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-      <!-- Injected cart items -->
-    </div>
-
-    <div id="emptyCartMsg" class="hidden flex-1 flex flex-col items-center justify-center text-slate-400 px-5">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l3.6-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-      <p class="font-medium" data-i18n="cartEmpty">السلة فارغة</p>
-      <p class="text-sm" data-i18n="cartEmptySub">أضف بعض المنتجات للبدء.</p>
-    </div>
-
-    <div class="border-t border-slate-200 px-5 py-4 space-y-3">
-      <div class="flex items-center justify-between text-slate-900 font-bold text-lg">
-        <span data-i18n="total">الإجمالي</span>
-        <span id="cartTotal">0.00 د.ك</span>
-      </div>
-
-      <button id="checkoutBtn"
-        class="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-1.746-.873-2.888-1.558-4.035-3.53-.305-.526.305-.489.874-1.627.098-.198.049-.372-.05-.52-.099-.15-.669-1.611-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.017-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.05 3.132 4.977 4.27 2.928 1.14 2.928.759 3.849.65.918-.109 2.006-.767 2.269-1.51.264-.744.264-1.376.185-1.51-.079-.132-.298-.198-.594-.347z"/>
-          <path d="M12.004 2.003c-5.514 0-9.997 4.483-9.997 9.997 0 1.762.464 3.417 1.276 4.851L2.05 22l5.271-1.383a9.94 9.94 0 0 0 4.683 1.188c5.514 0 9.997-4.483 9.997-9.997 0-5.514-4.483-9.997-9.997-9.997zm0 18.033a8.02 8.02 0 0 1-4.115-1.14l-.294-.174-3.06.803.818-2.986-.191-.307a8.036 8.036 0 0 1-1.231-4.232c0-4.436 3.61-8.046 8.046-8.046 4.436 0 8.046 3.61 8.046 8.046 0 4.436-3.61 8.046-8.019 8.036z"/>
-        </svg>
-        <span data-i18n="checkoutWhatsapp">الشراء عبر واتساب</span>
-      </button>
-      <button id="clearCartBtn" class="w-full text-center text-sm text-slate-400 hover:text-red-500 transition" data-i18n="clearCart">
-        تفريغ السلة
-      </button>
-    </div>
-  </aside>
-
-  <!-- ============ ADMIN LOGIN MODAL ============ -->
-  <div id="adminLoginOverlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div id="adminLoginModal" class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-      <h3 class="text-xl font-bold text-slate-900 mb-2" data-i18n="adminLoginTitle">تسجيل دخول المسؤول</h3>
-      <p class="text-sm text-slate-500 mb-4" data-i18n="adminLoginSub">أدخل كلمة المرور لإدارة المنتجات.</p>
-      
-      <form id="adminLoginForm" class="space-y-4">
-        <div>
-          <input type="password" id="adminPasswordInput" required placeholder="••••••••"
-            class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-center tracking-widest" />
+    <!-- شريط العناوين العلوي -->
+    <header class="bg-gradient-to-r from-blue-900 to-indigo-800 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">🏢 إدارة الأصول الثابتة وإهلاكها</h1>
+            <span class="bg-blue-700 text-xs px-3 py-1 rounded-full font-semibold">الإصدار 1.0</span>
         </div>
-        <div class="flex gap-2">
-          <button type="button" id="closeAdminModalBtn" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-lg transition" data-i18n="cancel">
-            إلغاء
-          </button>
-          <button type="submit" class="w-1/2 bg-slate-900 hover:bg-slate-700 text-white font-semibold py-2 rounded-lg transition" data-i18n="login">
-            دخول
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+    </header>
 
-  <!-- ============ PRODUCT DETAILS MODAL ============ -->
-  <div id="productDetailsOverlay" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div id="productDetailsModal" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8">
-      <div class="flex items-center justify-between p-4 border-b border-slate-100">
-        <h3 id="detailTitle" class="text-xl font-bold text-slate-900" data-i18n="productDetails">تفاصيل المنتج</h3>
-        <button id="closeProductDetailsBtn" class="text-slate-500 hover:text-slate-800 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      <div class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
-        <!-- الصورة الرئيسية -->
-        <div class="w-full h-72 sm:h-80 bg-slate-100 rounded-xl overflow-hidden">
-          <img id="detailMainImage" src="" alt="" class="w-full h-full object-cover" />
-        </div>
+    <main class="container mx-auto px-6 py-8">
         
-        <!-- معرض الصور المصغرة -->
-        <div>
-          <p class="text-xs font-semibold text-slate-400 mb-2" data-i18n="gallery">معرض الصور</p>
-          <div id="detailGallery" class="flex gap-2 overflow-x-auto pb-2">
-            <!-- Injected Gallery Images -->
-          </div>
-        </div>
+        <!-- قسم إضافة أصل جديد -->
+        <section class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-slate-200">
+            <h2 class="text-lg font-bold text-blue-900 mb-4 border-b pb-2">➕ إضافة أصل جديد</h2>
+            <form id="assetForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">وصف الأصل</label>
+                    <input type="text" id="assetName" required placeholder="مثال: أجهزة حاسب آلي للإدارة" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">تاريخ الشراء</label>
+                    <input type="date" id="purchaseDate" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">تكلفة الاقتناء (ر.س)</label>
+                    <input type="number" id="assetCost" required placeholder="0.00" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">القيمة التخريدية (ر.س)</label>
+                    <input type="number" id="salvageValue" required placeholder="0.00" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">العمر الافتراضي (بالسنوات)</label>
+                    <input type="number" id="usefulLife" required placeholder="5" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">طريقة الإهلاك</label>
+                    <select id="depMethod" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="straight">قسط ثابت (Straight-Line)</option>
+                    </select>
+                </div>
+                <div class="md:col-span-3 flex justify-end mt-2">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg text-sm transition duration-200 shadow">
+                        حفظ وإضافة الأصل للنظام
+                    </button>
+                </div>
+            </form>
+        </section>
 
-        <!-- معلومات المنتج والوصف -->
-        <div class="space-y-3">
-          <div class="flex justify-between items-center">
-            <span id="detailPrice" class="text-2xl font-extrabold text-emerald-600"></span>
-          </div>
-          <p id="detailDescription" class="text-slate-600 text-base leading-relaxed whitespace-pre-line"></p>
-        </div>
-      </div>
-      <div class="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
-        <button id="detailAddToCartBtn" class="flex-1 bg-slate-900 hover:bg-emerald-600 text-white font-bold py-3 rounded-lg transition" data-i18n="addToCart">
-          إضافة إلى السلة
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ ADD / EDIT PRODUCT MODAL (ADMIN ONLY) ============ -->
-  <div id="productModalOverlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div id="productModal" class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between mb-4">
-        <h3 id="modalTitle" class="text-xl font-bold text-slate-900" data-i18n="addNewProduct">إضافة منتج جديد</h3>
-        <button id="closeProductModalBtn" class="text-slate-500 hover:text-slate-800 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <form id="productForm" class="space-y-4">
-        <input type="hidden" id="editProductId" value="" />
-
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1" data-i18n="labelTitle">اسم المنتج (عربي / English)</label>
-          <input type="text" id="productTitleInput" required placeholder="مثال: سماعات لاسلكية / Wireless Headphones"
-            class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1" data-i18n="labelMainImg">رابط الصورة الرئيسية</label>
-          <input type="url" id="productImageInput" required placeholder="https://example.com/image.jpg"
-            class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1" data-i18n="labelGalleryImg">روابط الصور الإضافية (مفصولة بفواصل)</label>
-          <input type="text" id="productGalleryInput" placeholder="https://ex.com/1.jpg, https://ex.com/2.jpg"
-            class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1" data-i18n="labelDesc">الوصف</label>
-          <textarea id="productDescriptionInput" required rows="3" placeholder="وصف المنتج..."
-            class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1" data-i18n="labelPrice">السعر بالدينار (د.ك)</label>
-          <input type="number" id="productPriceInput" required min="0" step="0.01" placeholder="مثال: 18.50"
-            class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-        </div>
-
-        <button type="submit" id="saveProductBtn"
-          class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition" data-i18n="saveProduct">
-          حفظ المنتج
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ============ TOAST NOTIFICATION ============ -->
-  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-lg shadow-lg z-[60] text-sm font-medium">
-    Notification text
-  </div>
-
-  <script>
-    /* =========================================================
-       CONFIG, DATA & I18N
-       ========================================================= */
-    const SELLER_PHONE = "60085043"; // الرقم المباشر للواتساب
-    const ADMIN_PASSWORD = "@Hmedx1990"; // كلمة مرور الأدمن المخفية
-
-    let currentLang = "ar"; // 'ar' or 'en'
-
-    const TRANSLATIONS = {
-      ar: {
-        adminBadge: "وضع المسؤول",
-        addProduct: "إضافة منتج",
-        heroTitle: "منتجات عالية الجودة، مباشرة إلى محادثتك",
-        heroSub: "تصفح كتالوج المنتجات، أضف السلع إلى السلة، وأكمل الطلب مباشرة عبر الواتساب بدون حساب.",
-        ourProducts: "منتجاتنا",
-        adminLogin: "تسجيل دخول الأدمن",
-        adminLogout: "خروج الأدمن",
-        yourCart: "سلة التسوق",
-        cartEmpty: "السلة فارغة",
-        cartEmptySub: "أضف بعض المنتجات للبدء.",
-        total: "الإجمالي",
-        checkoutWhatsapp: "الشراء عبر واتساب",
-        clearCart: "تفريغ السلة",
-        adminLoginTitle: "تسجيل دخول المسؤول",
-        adminLoginSub: "أدخل كلمة المرور لإدارة المنتجات.",
-        cancel: "إلغاء",
-        login: "دخول",
-        productDetails: "تفاصيل المنتج",
-        gallery: "معرض الصور",
-        addToCart: "إضافة إلى السلة",
-        addNewProduct: "إضافة منتج جديد",
-        editProduct: "تعديل المنتج",
-        labelTitle: "اسم المنتج",
-        labelMainImg: "رابط الصورة الرئيسية",
-        labelGalleryImg: "روابط الصور الإضافية (مفصولة بفواصل)",
-        labelDesc: "الوصف",
-        labelPrice: "السعر بالدينار (د.ك)",
-        saveProduct: "حفظ المنتج",
-        currency: "د.ك",
-        itemsLabel: "منتجات",
-        itemLabel: "منتج",
-        addedToCart: "تمت الإضافة إلى السلة!",
-        loginSuccess: "تم تسجيل الدخول بنجاح!",
-        loginError: "كلمة المرور غير صحيحة!",
-        loggedOut: "تم تسجيل الخروج من وضع الأدمن",
-        fillFields: "يرجى ملء جميع الحقول بشكل صحيح.",
-        updatedSuccess: "تم تحديث المنتج بنجاح!",
-        addedSuccess: "تم إضافة المنتج بنجاح!",
-        confirmDelete: "هل أنت تأكد من رغبتك في حذف هذا المنتج؟",
-        deletedSuccess: "تم حذف المنتج!"
-      },
-      en: {
-        adminBadge: "Admin Mode",
-        addProduct: "Add Product",
-        heroTitle: "Quality Products, Straight to Your Chat",
-        heroSub: "Browse our catalog, add items to your cart, and check out instantly via WhatsApp — no account needed.",
-        ourProducts: "Our Products",
-        adminLogin: "Admin Login",
-        adminLogout: "Admin Logout",
-        yourCart: "Your Cart",
-        cartEmpty: "Your cart is empty",
-        cartEmptySub: "Add some products to get started.",
-        total: "Total",
-        checkoutWhatsapp: "Checkout via WhatsApp",
-        clearCart: "Clear cart",
-        adminLoginTitle: "Admin Login",
-        adminLoginSub: "Enter password to manage products.",
-        cancel: "Cancel",
-        login: "Login",
-        productDetails: "Product Details",
-        gallery: "Product Gallery",
-        addToCart: "Add to Cart",
-        addNewProduct: "Add New Product",
-        editProduct: "Edit Product",
-        labelTitle: "Product Title",
-        labelMainImg: "Main Image URL",
-        labelGalleryImg: "Gallery Image URLs (comma separated)",
-        labelDesc: "Description",
-        labelPrice: "Price in Dinar (KWD)",
-        saveProduct: "Save Product",
-        currency: "KWD",
-        itemsLabel: "items",
-        itemLabel: "item",
-        addedToCart: "Added to cart!",
-        loginSuccess: "Admin access granted!",
-        loginError: "Incorrect Password!",
-        loggedOut: "Logged out from Admin mode",
-        fillFields: "Please fill in all fields correctly.",
-        updatedSuccess: "Product updated successfully!",
-        addedSuccess: "Product added successfully!",
-        confirmDelete: "Are you sure you want to delete this product?",
-        deletedSuccess: "Product deleted!"
-      }
-    };
-
-    const DEFAULT_PRODUCTS = [
-      {
-        id: "p1",
-        title: "حقيبة ظهر كلاسيكية من الجلد / Classic Leather Backpack",
-        description: "حقيبة ظهر متينة ومقاومة للماء تحتوي على جيب مخصص للكمبيوتر المحمول. مثالية للاستخدام اليومي والتنقلات.",
-        price: 18.50,
-        image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&q=80",
-        images: [
-          "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&q=80",
-          "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&q=80"
-        ]
-      },
-      {
-        id: "p2",
-        title: "سماعات بلوتوث لاسلكية / Wireless Bluetooth Headphones",
-        description: "سماعات رأس تحيط بالأذن مع تقنية إلغاء الضوضاء النشطة وعمر بطارية يدوم حتى 30 ساعة متواصلة.",
-        price: 27.00,
-        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
-        images: [
-          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
-          "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=500&q=80"
-        ]
-      },
-      {
-        id: "p3",
-        title: "ساعة يد كلاسيكية أنيقة / Minimalist Analog Watch",
-        description: "ساعة أنيقة من الفولاذ المقاوم للصدأ مع سوار من الجلد الطبيعي. مقاومة للماء حتى عمق 30 متراً.",
-        price: 13.90,
-        image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=500&q=80",
-        images: [
-          "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=500&q=80",
-          "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80"
-        ]
-      }
-    ];
-
-    let products = [];
-    let cart = [];
-    let isAdmin = false;
-    let selectedProductId = null;
-
-    const STORAGE_KEYS = {
-      cart: "shopeasy_cart",
-      products: "shopeasy_products",
-      lang: "shopeasy_lang"
-    };
-
-    function loadFromStorage(key, fallback) {
-      try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : fallback;
-      } catch (err) {
-        return fallback;
-      }
-    }
-
-    function saveToStorage(key, value) {
-      try {
-        localStorage.setItem(key, JSON.stringify(value));
-      } catch (err) {}
-    }
-
-    /* =========================================================
-       INITIALIZATION & LANGUAGE TOGGLE
-       ========================================================= */
-    function init() {
-      document.getElementById("year").textContent = new Date().getFullYear();
-      currentLang = loadFromStorage(STORAGE_KEYS.lang, "ar");
-      
-      products = loadFromStorage(STORAGE_KEYS.products, null) || DEFAULT_PRODUCTS;
-      cart = loadFromStorage(STORAGE_KEYS.cart, []);
-
-      applyLanguage(currentLang);
-      updateAdminUI();
-      renderProducts();
-      renderCart();
-      bindEvents();
-    }
-
-    function toggleLanguage() {
-      currentLang = currentLang === "ar" ? "en" : "ar";
-      saveToStorage(STORAGE_KEYS.lang, currentLang);
-      applyLanguage(currentLang);
-      renderProducts();
-      renderCart();
-    }
-
-    function applyLanguage(lang) {
-      const htmlRoot = document.getElementById("htmlRoot");
-      htmlRoot.setAttribute("lang", lang);
-      htmlRoot.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
-
-      document.getElementById("langLabel").textContent = lang === "ar" ? "English" : "عربي";
-
-      document.querySelectorAll("[data-i18n]").forEach((el) => {
-        const key = el.getAttribute("data-i18n");
-        if (TRANSLATIONS[lang][key]) {
-          el.textContent = TRANSLATIONS[lang][key];
-        }
-      });
-
-      updateAdminUI();
-    }
-
-    /* =========================================================
-       ADMIN SYSTEM CONTROLS
-       ========================================================= */
-    function updateAdminUI() {
-      const adminElements = document.querySelectorAll(".admin-only");
-      const adminBadge = document.getElementById("adminBadge");
-      const adminToggleText = document.getElementById("adminToggleText");
-
-      if (isAdmin) {
-        adminElements.forEach(el => el.classList.remove("hidden"));
-        adminBadge.classList.remove("hidden");
-        adminToggleText.textContent = TRANSLATIONS[currentLang].adminLogout;
-      } else {
-        adminElements.forEach(el => el.classList.add("hidden"));
-        adminBadge.classList.add("hidden");
-        adminToggleText.textContent = TRANSLATIONS[currentLang].adminLogin;
-      }
-    }
-
-    function handleAdminAuth() {
-      if (isAdmin) {
-        isAdmin = false;
-        updateAdminUI();
-        renderProducts();
-        showToast(TRANSLATIONS[currentLang].loggedOut);
-      } else {
-        document.getElementById("adminLoginOverlay").classList.add("open");
-        document.getElementById("adminPasswordInput").focus();
-      }
-    }
-
-    /* =========================================================
-       PRODUCT RENDERING & DETAILS MODAL
-       ========================================================= */
-    function renderProducts() {
-      const grid = document.getElementById("productGrid");
-      grid.innerHTML = "";
-
-      const countText = products.length + " " + (products.length === 1 ? TRANSLATIONS[currentLang].itemLabel : TRANSLATIONS[currentLang].itemsLabel);
-      document.getElementById("productCountLabel").textContent = countText;
-
-      products.forEach((product) => {
-        const card = document.createElement("div");
-        card.className =
-          "bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col relative group cursor-pointer";
-
-        const adminControls = isAdmin ? `
-          <div class="absolute top-2 ltr:right-2 rtl:left-2 flex gap-1 bg-white/90 backdrop-blur-sm p-1 rounded-lg shadow-sm z-10">
-            <button data-id="${product.id}" class="edit-product-btn p-1.5 text-slate-600 hover:text-emerald-600 transition" title="Edit Product">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-            </button>
-            <button data-id="${product.id}" class="delete-product-btn p-1.5 text-slate-600 hover:text-red-500 transition" title="Delete Product">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
-          </div>
-        ` : '';
-
-        card.innerHTML = `
-          <div class="aspect-[4/3] w-full overflow-hidden bg-slate-100 relative product-card-click" data-id="${product.id}">
-            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}"
-              class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-              onerror="this.onerror=null;this.src='https://placehold.co/500x375?text=No+Image';" />
-            ${adminControls}
-          </div>
-
-          <div class="p-4 flex flex-col flex-1">
-            <h3 class="font-semibold text-slate-900 mb-1 line-clamp-1 product-card-click" data-id="${product.id}">${escapeHtml(product.title)}</h3>
-            <p class="text-sm text-slate-500 mb-3 flex-1 line-clamp-2 product-card-click" data-id="${product.id}">${escapeHtml(product.description)}</p>
-            <div class="flex items-center justify-between mt-auto">
-              <span class="text-lg font-bold text-emerald-600">${Number(product.price).toFixed(2)} ${TRANSLATIONS[currentLang].currency}</span>
-              <button data-id="${product.id}"
-                class="add-to-cart-btn bg-slate-900 hover:bg-emerald-600 text-white text-sm font-semibold px-3 py-2 rounded-lg transition z-10">
-                ${TRANSLATIONS[currentLang].addToCart}
-              </button>
+        <!-- جدول الأصول الحالية -->
+        <section class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h2 class="text-lg font-bold text-blue-900 mb-4 border-b pb-2">📋 سجل الأصول الثابتة وجداول الإهلاك</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-700 text-xs uppercase border-b">
+                            <th class="p-3">كود الأصل</th>
+                            <th class="p-3">اسم الأصل</th>
+                            <th class="p-3">تاريخ الشراء</th>
+                            <th class="p-3">التكلفة</th>
+                            <th class="p-3">العمر</th>
+                            <th class="p-3">مجمع الإهلاك السنوي</th>
+                            <th class="p-3">القيمة الدفترية</th>
+                            <th class="p-3 text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assetsTableBody" class="text-sm divide-y divide-slate-100">
+                        <!-- تُضاف الصفوف برمجياً هنا -->
+                        <tr class="text-center text-slate-400">
+                            <td colspan="8" class="py-6">لا توجد أصول مضافة حالياً. ابدأ بإضافة أصل جديد.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
+        </section>
 
-      document.querySelectorAll(".product-card-click").forEach((el) => {
-        el.addEventListener("click", (e) => {
-          if (!e.target.closest('.edit-product-btn') && !e.target.closest('.delete-product-btn')) {
-            openProductDetailsModal(el.dataset.id);
-          }
+    </main>
+
+    <!-- سكربت التشغيل وحساب الإهلاك -->
+    <script>
+        let assets = [];
+
+        document.getElementById('assetForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('assetName').value;
+            const date = document.getElementById('purchaseDate').value;
+            const cost = parseFloat(document.getElementById('assetCost').value);
+            const salvage = parseFloat(document.getElementById('salvageValue').value);
+            const life = parseInt(document.getElementById('usefulLife').value);
+
+            // حساب الإهلاك السنوي للقسط الثابت
+            const annualDepreciation = (cost - salvage) / life;
+            const currentBookValue = cost - annualDepreciation; // افتراضي للسنة الأولى
+
+            const newAsset = {
+                id: 'FA-' + Math.floor(1000 + Math.random() * 9000),
+                name,
+                date,
+                cost,
+                salvage,
+                life,
+                annualDepreciation: annualDepreciation.toFixed(2),
+                bookValue: currentBookValue.toFixed(2)
+            };
+
+            assets.push(newAsset);
+            renderTable();
+            this.reset();
         });
-      });
 
-      document.querySelectorAll(".add-to-cart-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          addToCart(btn.dataset.id);
-        });
-      });
+        function renderTable() {
+            const tbody = document.getElementById('assetsTableBody');
+            if (assets.length === 0) {
+                tbody.innerHTML = `<tr class="text-center text-slate-400"><td colspan="8" class="py-6">لا توجد أصول مضافة حالياً. ابدأ بإضافة أصل جديد.</td></tr>`;
+                return;
+            }
 
-      if (isAdmin) {
-        document.querySelectorAll(".edit-product-btn").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            openEditProductModal(btn.dataset.id);
-          });
-        });
-        document.querySelectorAll(".delete-product-btn").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            deleteProduct(btn.dataset.id);
-          });
-        });
-      }
-    }
-
-    function openProductDetailsModal(productId) {
-      const product = products.find(p => p.id === productId);
-      if (!product) return;
-
-      selectedProductId = productId;
-      document.getElementById("detailTitle").textContent = product.title;
-      document.getElementById("detailDescription").textContent = product.description;
-      document.getElementById("detailPrice").textContent = `${Number(product.price).toFixed(2)} ${TRANSLATIONS[currentLang].currency}`;
-      
-      const mainImg = document.getElementById("detailMainImage");
-      mainImg.src = product.image;
-
-      const gallery = document.getElementById("detailGallery");
-      gallery.innerHTML = "";
-
-      const allImages = [product.image, ...(product.images || [])];
-      const uniqueImages = [...new Set(allImages)];
-
-      uniqueImages.forEach((imgUrl) => {
-        const thumb = document.createElement("img");
-        thumb.src = imgUrl;
-        thumb.className = "w-16 h-16 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-emerald-500 transition";
-        thumb.onclick = () => { mainImg.src = imgUrl; };
-        gallery.appendChild(thumb);
-      });
-
-      document.getElementById("productDetailsOverlay").classList.add("open");
-    }
-
-    function closeProductDetailsModal() {
-      document.getElementById("productDetailsOverlay").classList.remove("open");
-      selectedProductId = null;
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement("div");
-      div.textContent = str ?? "";
-      return div.innerHTML;
-    }
-
-    /* =========================================================
-       PRODUCT FORM CONTROLS (ADMIN ONLY)
-       ========================================================= */
-    function openAddProductModal() {
-      if (!isAdmin) return;
-      document.getElementById("modalTitle").textContent = TRANSLATIONS[currentLang].addNewProduct;
-      document.getElementById("editProductId").value = "";
-      document.getElementById("productForm").reset();
-      openProductModal();
-    }
-
-    function openEditProductModal(productId) {
-      if (!isAdmin) return;
-      const product = products.find((p) => p.id === productId);
-      if (!product) return;
-
-      document.getElementById("modalTitle").textContent = TRANSLATIONS[currentLang].editProduct;
-      document.getElementById("editProductId").value = product.id;
-      document.getElementById("productTitleInput").value = product.title;
-      document.getElementById("productImageInput").value = product.image;
-      document.getElementById("productGalleryInput").value = product.images ? product.images.join(", ") : "";
-      document.getElementById("productDescriptionInput").value = product.description;
-      document.getElementById("productPriceInput").value = product.price;
-
-      openProductModal();
-    }
-
-    function handleProductFormSubmit(e) {
-      e.preventDefault();
-      if (!isAdmin) return;
-
-      const editId = document.getElementById("editProductId").value;
-      const title = document.getElementById("productTitleInput").value.trim();
-      const image = document.getElementById("productImageInput").value.trim();
-      const galleryRaw = document.getElementById("productGalleryInput").value.trim();
-      const description = document.getElementById("productDescriptionInput").value.trim();
-      const price = parseFloat(document.getElementById("productPriceInput").value);
-
-      const images = galleryRaw ? galleryRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
-
-      if (!title || !image || !description || isNaN(price) || price < 0) {
-        showToast(TRANSLATIONS[currentLang].fillFields);
-        return;
-      }
-
-      if (editId) {
-        const productIndex = products.findIndex((p) => p.id === editId);
-        if (productIndex !== -1) {
-          products[productIndex] = { id: editId, title, image, images, description, price };
-          showToast(TRANSLATIONS[currentLang].updatedSuccess);
+            tbody.innerHTML = '';
+            assets.forEach((asset, index) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-semibold text-blue-900">${asset.id}</td>
+                        <td class="p-3">${asset.name}</td>
+                        <td class="p-3">${asset.date}</td>
+                        <td class="p-3">${asset.cost.toLocaleString()} ر.س</td>
+                        <td class="p-3">${asset.life} سنوات</td>
+                        <td class="p-3 text-red-600">${asset.annualDepreciation} ر.س</td>
+                        <td class="p-3 font-bold text-emerald-600">${asset.bookValue} ر.س</td>
+                        <td class="p-3 text-center">
+                            <button onclick="deleteAsset(${index})" class="bg-red-50 text-red-600 px-3 py-1 rounded text-xs hover:bg-red-100 transition">استبعاد / حذف</button>
+                        </td>
+                    </tr>
+                `;
+            });
         }
-      } else {
-        const newProduct = { id: "p" + Date.now(), title, image, images, description, price };
-        products.push(newProduct);
-        showToast(TRANSLATIONS[currentLang].addedSuccess);
-      }
 
-      saveToStorage(STORAGE_KEYS.products, products);
-      renderProducts();
-      closeProductModal();
-    }
-
-    function deleteProduct(productId) {
-      if (!isAdmin) return;
-      if (!confirm(TRANSLATIONS[currentLang].confirmDelete)) return;
-
-      products = products.filter((p) => p.id !== productId);
-      saveToStorage(STORAGE_KEYS.products, products);
-      cart = cart.filter((item) => item.id !== productId);
-      
-      saveToStorage(STORAGE_KEYS.cart, cart);
-      renderProducts();
-      renderCart();
-      showToast(TRANSLATIONS[currentLang].deletedSuccess);
-    }
-
-    /* =========================================================
-       CART LOGIC
-       ========================================================= */
-    function addToCart(productId) {
-      const product = products.find((p) => p.id === productId);
-      if (!product) return;
-
-      const existing = cart.find((item) => item.id === productId);
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        cart.push({ id: product.id, title: product.title, price: product.price, image: product.image, quantity: 1 });
-      }
-
-      saveToStorage(STORAGE_KEYS.cart, cart);
-      renderCart();
-      showToast(TRANSLATIONS[currentLang].addedToCart);
-      bumpBadge();
-    }
-
-    function updateQuantity(productId, delta) {
-      const item = cart.find((i) => i.id === productId);
-      if (!item) return;
-
-      item.quantity += delta;
-      if (item.quantity <= 0) {
-        cart = cart.filter((i) => i.id !== productId);
-      }
-
-      saveToStorage(STORAGE_KEYS.cart, cart);
-      renderCart();
-    }
-
-    function removeFromCart(productId) {
-      cart = cart.filter((i) => i.id !== productId);
-      saveToStorage(STORAGE_KEYS.cart, cart);
-      renderCart();
-    }
-
-    function clearCart() {
-      cart = [];
-      saveToStorage(STORAGE_KEYS.cart, cart);
-      renderCart();
-    }
-
-    function getCartTotal() {
-      return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    }
-
-    function getCartItemCount() {
-      return cart.reduce((sum, item) => sum + item.quantity, 0);
-    }
-
-    function renderCart() {
-      const container = document.getElementById("cartItemsContainer");
-      const emptyMsg = document.getElementById("emptyCartMsg");
-      const checkoutBtn = document.getElementById("checkoutBtn");
-      const clearBtn = document.getElementById("clearCartBtn");
-
-      container.innerHTML = "";
-
-      if (cart.length === 0) {
-        container.classList.add("hidden");
-        emptyMsg.classList.remove("hidden");
-        checkoutBtn.disabled = true;
-        clearBtn.classList.add("hidden");
-      } else {
-        container.classList.remove("hidden");
-        emptyMsg.classList.add("hidden");
-        checkoutBtn.disabled = false;
-        clearBtn.classList.remove("hidden");
-
-        cart.forEach((item) => {
-          const row = document.createElement("div");
-          row.className = "flex gap-3 items-center border-b border-slate-100 pb-3";
-          row.innerHTML = `
-            <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}"
-              class="w-16 h-16 rounded-lg object-cover bg-slate-100 flex-shrink-0" />
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-slate-900 line-clamp-1">${escapeHtml(item.title)}</p>
-              <p class="text-sm text-emerald-600 font-medium">${item.price.toFixed(2)} ${TRANSLATIONS[currentLang].currency}</p>
-              <div class="flex items-center gap-2 mt-1">
-                <button class="qty-decrease w-6 h-6 flex items-center justify-center rounded bg-slate-100 hover:bg-slate-200 text-slate-700" data-id="${item.id}">−</button>
-                <span class="text-sm font-medium w-6 text-center">${item.quantity}</span>
-                <button class="qty-increase w-6 h-6 flex items-center justify-center rounded bg-slate-100 hover:bg-slate-200 text-slate-700" data-id="${item.id}">+</button>
-              </div>
-            </div>
-            <button class="remove-item text-slate-400 hover:text-red-500 transition flex-shrink-0" data-id="${item.id}">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
-          `;
-          container.appendChild(row);
-        });
-
-        container.querySelectorAll(".qty-increase").forEach((btn) =>
-          btn.addEventListener("click", () => updateQuantity(btn.dataset.id, 1))
-        );
-        container.querySelectorAll(".qty-decrease").forEach((btn) =>
-          btn.addEventListener("click", () => updateQuantity(btn.dataset.id, -1))
-        );
-        container.querySelectorAll(".remove-item").forEach((btn) =>
-          btn.addEventListener("click", () => removeFromCart(btn.dataset.id))
-        );
-      }
-
-      document.getElementById("cartTotal").textContent = `${getCartTotal().toFixed(2)} ${TRANSLATIONS[currentLang].currency}`;
-      document.getElementById("cartCountBadge").textContent = getCartItemCount();
-    }
-
-    function bumpBadge() {
-      const badge = document.getElementById("cartCountBadge");
-      badge.classList.remove("bump");
-      void badge.offsetWidth;
-      badge.classList.add("bump");
-    }
-
-    /* =========================================================
-       WHATSAPP CHECKOUT
-       ========================================================= */
-    function handleCheckout() {
-      if (cart.length === 0) return;
-
-      let message = currentLang === "ar" ? "مرحباً! أود تقديم الطلب التالي:\n\n" : "Hello! I'd like to place the following order:\n\n";
-      cart.forEach((item, index) => {
-        message += `${index + 1}. ${item.title} — ${item.quantity}x — ${ (item.price * item.quantity).toFixed(2) } ${TRANSLATIONS[currentLang].currency}\n`;
-      });
-      message += `\n${TRANSLATIONS[currentLang].total}: ${getCartTotal().toFixed(2)} ${TRANSLATIONS[currentLang].currency}`;
-
-      const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://wa.me/${SELLER_PHONE}?text=${encodedMessage}`;
-
-      window.open(whatsappUrl, "_blank");
-    }
-
-    /* =========================================================
-       MODALS CONTROLS & UI HELPERS
-       ========================================================= */
-    function openCart() {
-      document.getElementById("cartDrawer").classList.add("open");
-      document.getElementById("overlay").classList.add("open");
-    }
-
-    function closeCart() {
-      document.getElementById("cartDrawer").classList.remove("open");
-      document.getElementById("overlay").classList.remove("open");
-    }
-
-    function openProductModal() {
-      document.getElementById("productModalOverlay").classList.add("open");
-    }
-
-    function closeProductModal() {
-      document.getElementById("productModalOverlay").classList.remove("open");
-      document.getElementById("productForm").reset();
-      document.getElementById("editProductId").value = "";
-    }
-
-    function closeAdminModal() {
-      document.getElementById("adminLoginOverlay").classList.remove("open");
-      document.getElementById("adminPasswordInput").value = "";
-    }
-
-    let toastTimeout;
-    function showToast(text) {
-      const toast = document.getElementById("toast");
-      toast.textContent = text;
-      toast.classList.add("show");
-
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        toast.classList.remove("show");
-      }, 2200);
-    }
-
-    /* =========================================================
-       EVENTS BINDING
-       ========================================================= */
-    function bindEvents() {
-      document.getElementById("langToggleBtn").addEventListener("click", toggleLanguage);
-
-      document.getElementById("openCartBtn").addEventListener("click", openCart);
-      document.getElementById("closeCartBtn").addEventListener("click", closeCart);
-      document.getElementById("overlay").addEventListener("click", closeCart);
-
-      document.getElementById("openAddProductBtn").addEventListener("click", openAddProductModal);
-      document.getElementById("closeProductModalBtn").addEventListener("click", closeProductModal);
-      
-      document.getElementById("closeProductDetailsBtn").addEventListener("click", closeProductDetailsModal);
-      document.getElementById("detailAddToCartBtn").addEventListener("click", () => {
-        if (selectedProductId) {
-          addToCart(selectedProductId);
-          closeProductDetailsModal();
+        function deleteAsset(index) {
+            if(confirm('هل أنت متأكد من رغبتك في استبعاد هذا الأصل؟')) {
+                assets.splice(index, 1);
+                renderTable();
+            }
         }
-      });
-
-      document.getElementById("productForm").addEventListener("submit", handleProductFormSubmit);
-      document.getElementById("checkoutBtn").addEventListener("click", handleCheckout);
-      document.getElementById("clearCartBtn").addEventListener("click", clearCart);
-
-      // Admin Login Controls
-      document.getElementById("adminToggleBtn").addEventListener("click", handleAdminAuth);
-      document.getElementById("closeAdminModalBtn").addEventListener("click", closeAdminModal);
-      
-      document.getElementById("adminLoginForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const pwd = document.getElementById("adminPasswordInput").value;
-        if (pwd === ADMIN_PASSWORD) {
-          isAdmin = true;
-          updateAdminUI();
-          renderProducts();
-          closeAdminModal();
-          showToast(TRANSLATIONS[currentLang].loginSuccess);
-        } else {
-          showToast(TRANSLATIONS[currentLang].loginError);
-        }
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", init);
-  </script>
+    </script>
 </body>
 </html>
