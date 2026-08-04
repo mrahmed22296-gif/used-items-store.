@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// تمرير المفتاح صراحةً لضمان عمله بكل كفاءة
+// تمرير مفتاح Gemini بشكل صريح ومباشر لضمان عمله بدون أي مشاكل
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 let sock;
