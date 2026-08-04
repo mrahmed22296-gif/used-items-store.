@@ -8,8 +8,15 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
+
+// تفعيل CORS لجميع النطاقات لمنع أي حظر للاتصال من الواجهة الأمامية
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
-app.use(cors());
 
 // خدمة الملفات الثابتة وتوجيه الصفحة الرئيسية لملف index.html مباشرة
 app.use(express.static(path.join(__dirname)));
