@@ -75,6 +75,7 @@
     </div>
 
     <script>
+        // تم ضبط الرابط هنا ليتطابق مع مشروعك الفعلي على Render
         const BACKEND_URL = 'https://whats-app-auto-replay.onrender.com';
 
         async function fetchQR() {
@@ -86,7 +87,6 @@
             statusDiv.innerText = 'حالة الاتصال: جاري جلب البيانات...';
 
             try {
-                // نستخدم خدمة كوسبروكسي بسيطة أو الجلب المباشر لتجاوز أي قيود متصفح
                 const response = await fetch(`${BACKEND_URL}/api/status`);
                 const data = await response.json();
                 
@@ -106,7 +106,7 @@
                             if (error) console.error(error);
                         });
                     } else {
-                        qrText.innerText = 'الخادم يعمل، بانتظار توليد الرمز...';
+                        qrText.innerText = 'الخادم يعمل، بانتظار توليد الرمز (انتظر قليلاً)...';
                         canvas.style.display = 'none';
                     }
                 }
@@ -118,6 +118,7 @@
             }
         }
 
+        // جلب الحالة تلقائياً عند فتح الصفحة
         fetchQR();
     </script>
 
