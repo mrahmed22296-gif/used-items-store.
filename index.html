@@ -4,128 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة روبوت الرد الآلي للواتساب</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <style>
         body {
             font-family: Tahoma, sans-serif;
             background-color: #f4f7f6;
             margin: 0;
-            padding: 20px;
-            color: #333;
+            padding: 10px;
             text-align: center;
         }
         .container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
             background: #fff;
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        h2 { color: #075e54; }
-        .status-box {
-            padding: 10px;
-            margin: 15px 0;
-            border-radius: 8px;
-            font-weight: bold;
-        }
-        .disconnected { background-color: #ffebee; color: #c62828; }
-        .connected { background-color: #e8f5e9; color: #2e7d32; }
-        button {
+        h2 { color: #075e54; font-size: 20px; }
+        p { color: #555; font-size: 14px; }
+        .btn {
+            display: inline-block;
             background-color: #25d366;
             color: white;
-            border: none;
-            padding: 10px 20px;
+            text-decoration: none;
+            padding: 12px 24px;
             font-size: 16px;
             border-radius: 8px;
-            cursor: pointer;
-            margin-top: 10px;
+            margin-top: 15px;
+            font-weight: bold;
         }
-        button:hover { background-color: #128c7e; }
-        #qr-container {
-            margin: 20px 0;
-            padding: 15px;
-            background: #fafafa;
-            border: 1px dashed #ccc;
-            border-radius: 8px;
-            min-height: 200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        canvas { max-width: 100%; }
+        .btn:hover { background-color: #128c7e; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2>🤖 روبوت واتساب بالذكاء الاصطناعي</h2>
+        <p>لإدارة وتشغيل البوت ومسح رمز الـ QR مباشرة من الخادم الآمن:</p>
         
-        <div id="status" class="status-box disconnected">
-            حالة الاتصال: جاري الاتصال بالخادم...
-        </div>
-
-        <div id="qr-container">
-            <p id="qr-text">يرجى الانتظار...</p>
-            <canvas id="qr-canvas"></canvas>
-        </div>
-
-        <button onclick="checkStatus()">🔄 تحديث الحالة</button>
+        <a href="https://whats-app-auto-replay.onrender.com/api/status" target="_blank" class="btn">
+            🔗 اضغط هنا لفتح لوحة التحكم المباشرة
+        </a>
     </div>
-
-    <script>
-        const BACKEND_URL = 'https://whats-app-auto-replay.onrender.com';
-
-        async function checkStatus() {
-            const statusDiv = document.getElementById('status');
-            const qrText = document.getElementById('qr-text');
-            const canvas = document.getElementById('qr-canvas');
-
-            statusDiv.className = 'status-box disconnected';
-            statusDiv.innerText = 'حالة الاتصال: جاري التحقق...';
-
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/status`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' },
-                    mode: 'cors'
-                });
-                
-                if (!response.ok) throw new Error('استجابة غير صحيحة من الخادم');
-
-                const data = await response.json();
-                
-                if (data.status === 'CONNECTED') {
-                    statusDiv.className = 'status-box connected';
-                    statusDiv.innerText = 'حالة الاتصال: متصل بنجاح ✅';
-                    qrText.innerText = 'تم ربط الواتساب بنجاح، البوت يعمل الآن!';
-                    canvas.style.display = 'none';
-                } else {
-                    statusDiv.className = 'status-box disconnected';
-                    statusDiv.innerText = 'حالة الاتصال: بانتظار مسح رمز QR ⏳';
-                    
-                    if (data.qr) {
-                        qrText.innerText = 'امسح الرمز أدناه من تطبيق واتساب:';
-                        canvas.style.display = 'block';
-                        QRCode.toCanvas(canvas, data.qr, { width: 220 }, function (error) {
-                            if (error) console.error(error);
-                        });
-                    } else {
-                        qrText.innerText = 'الخادم يعمل، جاري توليد رمز الـ QR...';
-                        canvas.style.display = 'none';
-                    }
-                }
-            } catch (error) {
-                statusDiv.className = 'status-box disconnected';
-                statusDiv.innerText = 'حالة الاتصال: خطأ في الاتصال بالخادم ❌';
-                qrText.innerText = 'تأكد من عمل الخادم على Render أو اضغط تحديث.';
-                console.error('خطأ:', error);
-            }
-        }
-
-        checkStatus();
-    </script>
 
 </body>
 </html>
