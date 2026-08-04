@@ -3,7 +3,6 @@ const { OpenAI } = require('openai');
 const express = require('express');
 const cors = require('cors');
 const pino = require('pino');
-const qrcode = require('qrcode'); // تأكد من إضافته أو استخدم الطريقة التالية
 
 require('dotenv').config();
 
@@ -20,62 +19,67 @@ let connectionStatus = 'DISCONNECTED';
 let latestQR = '';
 
 async function connectToWhatsApp() {
-    const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
-    
-    sock = makeWASocket({
-        auth: state,
-        logger: pino({ level: 'silent' }),
-        printQRInTerminal: false
-    });
-
-    sock.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect, qr } = update;
+    try {
+        const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
         
-        if (qr) {
-            latestQR = qr;
-            console.log('تم استلام رمز QR جديد');
-        }
+        sock = makeWASocket({
+            auth: state,
+            logger: pino({ level: 'silent' }),
+            printQRInTerminal: false,
+            browser: ["Chrome", "Macintosh", "10.15.7"]
+        });
 
-        if (connection === 'close') {
-            const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
-            connectionStatus = 'DISCONNECTED';
-            latestQR = '';
-            console.log('تم انقطاع الاتصال، جاري إعادة المحاولة...', shouldReconnect);
-            if (shouldReconnect) {
-                connectToWhatsApp();
+        sock.ev.on('connection.update', async (update) => {
+            const { connection, lastDisconnect, qr } = update;
+            
+            if (qr) {
+                latestQR = qr;
+                console.log('تم استلام رمز QR جديد وجاهز للعرض.');
             }
-        } else if (connection === 'open') {
-            connectionStatus = 'CONNECTED';
-            latestQR = '';
-            console.log('تم اتصال واتساب بنجاح!');
-        }
-    });
 
-    sock.ev.on('creds.update', saveCreds);
-
-    sock.ev.on('messages.upsert', async ({ messages, type }) => {
-        if (type !== 'notify') return;
-        for (const msg of messages) {
-            if (!msg.message || msg.key.fromMe) continue;
-            const senderPhone = msg.key.remoteJid;
-            const messageText = msg.message.conversation || msg.message.extendedTextMessage?.text;
-            if (!messageText) continue;
-
-            try {
-                const aiResponse = await openai.chat.completions.create({
-                    model: 'gpt-4o-mini',
-                    messages: [
-                        { role: 'system', content: 'أنت مساعد افتراضي ودود ومحترف لخدمة العملاء. أجب على استفسارات العملاء بدقة باللغة العربية.' },
-                        { role: 'user', content: messageText }
-                    ],
-                });
-                const replyText = aiResponse.choices[0].message.content;
-                await sock.sendMessage(senderPhone, { text: replyText });
-            } catch (error) {
-                console.error('خطأ:', error);
+            if (connection === 'close') {
+                const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
+                connectionStatus = 'DISCONNECTED';
+                latestQR = '';
+                console.log('انقطع الاتصال، جاري إعادة المحاولة...', shouldReconnect);
+                if (shouldReconnect) {
+                    setTimeout(connectToWhatsApp, 3000);
+                }
+            } else if (connection === 'open') {
+                connectionStatus = 'CONNECTED';
+                latestQR = '';
+                console.log('تم اتصال واتساب بنجاح!');
             }
-        }
-    });
+        });
+
+        sock.ev.on('creds.update', saveCreds);
+
+        sock.ev.on('messages.upsert', async ({ messages, type }) => {
+            if (type !== 'notify') return;
+            for (const msg of messages) {
+                if (!msg.message || msg.key.fromMe) continue;
+                const senderPhone = msg.key.remoteJid;
+                const messageText = msg.message.conversation || msg.message.extendedTextMessage?.text;
+                if (!messageText) continue;
+
+                try {
+                    const aiResponse = await openai.chat.completions.create({
+                        model: 'gpt-4o-mini',
+                        messages: [
+                            { role: 'system', content: 'أنت مساعد افتراضي ودود ومحترف لخدمة العملاء. أجب على استفسارات العملاء بدقة باللغة العربية.' },
+                            { role: 'user', content: messageText }
+                        ],
+                    });
+                    const replyText = aiResponse.choices[0].message.content;
+                    await sock.sendMessage(senderPhone, { text: replyText });
+                } catch (error) {
+                    console.error('خطأ في الرد الآلي:', error);
+                }
+            }
+        });
+    } catch (e) {
+        console.error('خطأ في تهيئة واتساب:', e);
+    }
 }
 
 app.get('/api/status', (req, res) => {
