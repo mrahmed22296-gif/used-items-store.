@@ -11,6 +11,13 @@
         body {
             font-family: 'Cairo', sans-serif;
         }
+        @media print {
+            body { background-color: white; }
+            no-print, header button, form, .no-print { display: none !important; }
+            .container { width: 100%; max-width: none; padding: 0; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #cbd5e1; padding: 6px; font-size: 10pt; }
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen">
@@ -26,7 +33,7 @@
     <main class="container mx-auto px-6 py-8">
         
         <!-- قسم إضافة أصل جديد -->
-        <section class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-slate-200">
+        <section class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-slate-200 no-print">
             <h2 class="text-lg font-bold text-blue-900 mb-4 border-b pb-2">➕ إضافة أصل جديد</h2>
             <form id="assetForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -65,7 +72,19 @@
 
         <!-- جدول الأصول الحالية -->
         <section class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
-            <h2 class="text-lg font-bold text-blue-900 mb-4 border-b pb-2">📋 سجل الأصول الثابتة وجداول الإهلاك</h2>
+            <div class="flex flex-col md:flex-row justify-between items-center mb-4 border-b pb-2 gap-4">
+                <h2 class="text-lg font-bold text-blue-900">📋 سجل الأصول الثابتة وجداول الإهلاك</h2>
+                <!-- أزرار الاستخراج والتصدير -->
+                <div class="flex gap-2 no-print">
+                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1 shadow-sm">
+                        📊 استخراج Excel
+                    </button>
+                    <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1 shadow-sm">
+                        📄 تصدير PDF / طباعة
+                    </button>
+                </div>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-right border-collapse">
                     <thead>
@@ -77,7 +96,7 @@
                             <th class="p-3">العمر</th>
                             <th class="p-3">مجمع الإهلاك السنوي</th>
                             <th class="p-3">القيمة الدفترية</th>
-                            <th class="p-3 text-center">الإجراءات</th>
+                            <th class="p-3 text-center no-print">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="assetsTableBody" class="text-sm divide-y divide-slate-100">
@@ -92,7 +111,7 @@
 
     </main>
 
-    <!-- سكربت التشغيل وحساب الإهلاك -->
+    <!-- سكربت التشغيل وحساب الإهلاك والتصدير -->
     <script>
         let assets = [];
 
@@ -105,9 +124,8 @@
             const salvage = parseFloat(document.getElementById('salvageValue').value);
             const life = parseInt(document.getElementById('usefulLife').value);
 
-            // حساب الإهلاك السنوي للقسط الثابت
             const annualDepreciation = (cost - salvage) / life;
-            const currentBookValue = cost - annualDepreciation; // افتراضي للسنة الأولى
+            const currentBookValue = cost - annualDepreciation;
 
             const newAsset = {
                 id: 'FA-' + Math.floor(1000 + Math.random() * 9000),
@@ -143,7 +161,7 @@
                         <td class="p-3">${asset.life} سنوات</td>
                         <td class="p-3 text-red-600">${asset.annualDepreciation} ر.س</td>
                         <td class="p-3 font-bold text-emerald-600">${asset.bookValue} ر.س</td>
-                        <td class="p-3 text-center">
+                        <td class="p-3 text-center no-print">
                             <button onclick="deleteAsset(${index})" class="bg-red-50 text-red-600 px-3 py-1 rounded text-xs hover:bg-red-100 transition">استبعاد / حذف</button>
                         </td>
                     </tr>
@@ -156,6 +174,37 @@
                 assets.splice(index, 1);
                 renderTable();
             }
+        }
+
+        // دالة استخراج البيانات بصيغة إكسل (CSV)
+        function exportToExcel() {
+            if (assets.length === 0) {
+                alert('لا توجد بيانات لتصديرها!');
+                return;
+            }
+
+            let csvContent = "\uFEFFكود الأصل,اسم الأصل,تاريخ الشراء,التكلفة,العمر الافتراضي,الإهلاك السنوي,القيمة الدفترية\n";
+            assets.forEach(asset => {
+                csvContent += `${asset.id},"${asset.name}",${asset.date},${asset.cost},${asset.life},${asset.annualDepreciation},${asset.bookValue}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Fixed_Assets_Schedule.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // دالة تصدير وطباعة PDF عبر متصفح الويب
+        function exportToPDF() {
+            if (assets.length === 0) {
+                alert('لا توجد بيانات لطباعتها!');
+                return;
+            }
+            window.print();
         }
     </script>
 </body>
