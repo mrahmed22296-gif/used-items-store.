@@ -11,7 +11,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// تهيئة Gemini API (تأكد من وضع مفتاح GEMINI_API_KEY في متغيرات البيئة)
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 let sock;
@@ -66,7 +65,6 @@ async function connectToWhatsApp() {
                 console.log(`تم استلام رسالة من ${senderPhone}: ${messageText}`);
 
                 try {
-                    // استخدام نموذج Gemini المجاني والسريع
                     const response = await ai.models.generateContent({
                         model: 'gemini-1.5-flash',
                         contents: [
