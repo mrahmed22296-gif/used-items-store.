@@ -9,7 +9,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-// تفعيل CORS لجميع النطاقات والمواقع (يحل مشكلة الاتصال تماماً)
+// تفعيل CORS لجميع النطاقات والمواقع
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST'],
@@ -22,7 +22,7 @@ const openai = new OpenAI({
 
 let sock;
 let connectionStatus = 'DISCONNECTED';
-let latestQR = '';
+let latestPairingCode = '';
 
 async function connectToWhatsApp() {
     try {
@@ -32,29 +32,39 @@ async function connectToWhatsApp() {
             auth: state,
             logger: pino({ level: 'silent' }),
             printQRInTerminal: false,
-            browser: ["Chrome", "Macintosh", "10.15.7"]
+            browser: ["Mac OS", "Chrome", "10.15.7"]
         });
 
+        // طلب كود الربط برقم الهاتف مباشرة إذا لم يكن الحساب مسجلاً
+        if (!sock.authState.creds.registered) {
+            setTimeout(async () => {
+                try {
+                    const phoneNumber = "96560085043"; // رقم هاتفك بصيغة دولية
+                    const code = await sock.requestPairingCode(phoneNumber);
+                    latestPairingCode = code;
+                    console.log(`====================================`);
+                    console.log(`🔑 رمز الربط الخاص بك هو: ${code}`);
+                    console.log(`====================================`);
+                } catch (err) {
+                    console.error('خطأ أثناء طلب كود الربط:', err);
+                }
+            }, 6000);
+        }
+
         sock.ev.on('connection.update', async (update) => {
-            const { connection, lastDisconnect, qr } = update;
-            
-            if (qr) {
-                latestQR = qr;
-                console.log('تم استلام رمز QR جديد.');
-            }
+            const { connection, lastDisconnect } = update;
 
             if (connection === 'close') {
                 const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
                 connectionStatus = 'DISCONNECTED';
-                latestQR = '';
                 console.log('انقطع الاتصال، جاري إعادة المحاولة...');
                 if (shouldReconnect) {
                     setTimeout(connectToWhatsApp, 3000);
                 }
             } else if (connection === 'open') {
                 connectionStatus = 'CONNECTED';
-                latestQR = '';
-                console.log('تم اتصال واتساب بنجاح!');
+                latestPairingCode = '';
+                console.log('تم اتصال واتساب بنجاح! 🎉');
             }
         });
 
@@ -88,8 +98,9 @@ async function connectToWhatsApp() {
     }
 }
 
+// مسار لجلب حالة الاتصال ورمز الربط
 app.get('/api/status', (req, res) => {
-    res.json({ status: connectionStatus, qr: latestQR });
+    res.json({ status: connectionStatus, pairingCode: latestPairingCode });
 });
 
 const PORT = process.env.PORT || 10000;
