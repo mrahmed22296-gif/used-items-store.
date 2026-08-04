@@ -3,7 +3,6 @@ const { GoogleGenAI } = require('@google/genai');
 const express = require('express');
 const cors = require('cors');
 const pino = require('pino');
-const qrcode = require('qrcode');
 
 require('dotenv').config();
 
@@ -11,7 +10,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// تمرير مفتاح Gemini بشكل صريح ومباشر لضمان عمله بدون أي مشاكل
+// تقديم الملفات الثابتة (مثل index.html إذا وضعتها في مجلد public)
+app.use(express.static('public'));
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 let sock;
@@ -39,6 +40,7 @@ async function connectToWhatsApp() {
             if (connection === 'close') {
                 const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
                 connectionStatus = 'DISCONNECTED';
+                latestQR = '';
                 if (shouldReconnect) {
                     setTimeout(connectToWhatsApp, 3000);
                 }
@@ -88,28 +90,16 @@ async function connectToWhatsApp() {
     }
 }
 
-app.get('/', async (req, res) => {
-    if (connectionStatus === 'CONNECTED') {
-        return res.send('<h2 style="text-align:center; color:green; margin-top:50px;">البوت متصل بنجاح مع واتساب (Gemini)! 🎉</h2>');
-    }
-    if (!latestQR) {
-        return res.send('<h2 style="text-align:center; margin-top:50px;">جاري تشغيل الخادم وتوليد الباركود، حدث الصفحة بعد ثوانٍ...</h2>');
-    }
-    try {
-        const urlImage = await qrcode.toDataURL(latestQR);
-        res.send(`
-            <div style="text-align:center; margin-top:40px;">
-                <h2>امسح رمز الاستجابة السريعة (QR) من واتساب</h2>
-                <img src="${urlImage}" style="width:300px; height:300px;" />
-                <p>قم بتحديث الصفحة (Refresh) إذا لم يتم الاتصال.</p>
-            </div>
-        `);
-    } catch (e) {
-        res.send('خطأ في توليد الباركود');
-    }
+// نقطة النهاية (API) التي يتصل بها ملف index.html لجلب الحالة والـ QR
+app.get('/api/status', (req, res) => {
+    res.json({
+        status: connectionStatus,
+        qr: latestQR
+    });
 });
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
+    console.log(`الخادم يعمل على المنفذ ${PORT}`);
     connectToWhatsApp();
 });
