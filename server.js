@@ -8,7 +8,13 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// تفعيل CORS لجميع النطاقات والمواقع (يحل مشكلة الاتصال تماماً)
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+}));
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, 
@@ -34,14 +40,14 @@ async function connectToWhatsApp() {
             
             if (qr) {
                 latestQR = qr;
-                console.log('تم استلام رمز QR جديد وجاهز للعرض.');
+                console.log('تم استلام رمز QR جديد.');
             }
 
             if (connection === 'close') {
                 const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
                 connectionStatus = 'DISCONNECTED';
                 latestQR = '';
-                console.log('انقطع الاتصال، جاري إعادة المحاولة...', shouldReconnect);
+                console.log('انقطع الاتصال، جاري إعادة المحاولة...');
                 if (shouldReconnect) {
                     setTimeout(connectToWhatsApp, 3000);
                 }
