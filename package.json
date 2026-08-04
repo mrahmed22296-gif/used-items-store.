@@ -1,7 +1,6 @@
 {
   "name": "whatsapp-ai-bot",
   "version": "1.0.0",
-  "description": "WhatsApp AI Auto Reply CRM",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
