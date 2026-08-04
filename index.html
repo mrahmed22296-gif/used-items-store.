@@ -3,121 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة الرد الذكي عبر واتساب - AI WhatsApp CRM</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>إدارة روبوت الرد الآلي للواتساب</title>
     <style>
-        body { font-family: 'Cairo', sans-serif; }
+        body {
+            font-family: Tahoma, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 { color: #075e54; }
+        .status-box {
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .disconnected { background-color: #ffebee; color: #c62828; }
+        .connected { background-color: #e8f5e9; color: #2e7d32; }
+        button {
+            background-color: #25d366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #128c7e; }
+        #qr-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fafafa;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen">
+<body>
 
-    <!-- شريط التنقل العلوي -->
-    <header class="bg-slate-800 border-b border-slate-700 shadow-sm">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <span class="text-2xl">🤖</span>
-                <h1 class="text-lg font-bold text-white">نظام الرد الآلي بالذكاء الاصطناعي لـ واتساب</h1>
-            </div>
-            <div class="flex items-center gap-2">
-                <span id="connectionBadge" class="bg-red-500/20 text-red-400 border border-red-500/30 text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> غير متصل
-                </span>
-            </div>
-        </div>
-    </header>
-
-    <main class="container mx-auto px-6 py-8 max-w-5xl">
+    <div class="container">
+        <h2>🤖 روبوت واتساب بالذكاء الاصطناعي</h2>
         
-        <!-- الخطوة الأولى: ربط رقم الهاتف -->
-        <section id="setupSection" class="bg-slate-800 rounded-2xl shadow-lg p-6 mb-8 border border-slate-700">
-            <h2 class="text-xl font-bold text-emerald-400 mb-4 flex items-center gap-2">
-                <span>📱</span> الخطوة الأولى: ربط رقم الواتساب
-            </h2>
-            <form id="whatsappForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold mb-2 text-slate-300">رقم الهاتف (مع رمز الدولة)</label>
-                    <input type="text" id="phoneNumber" required placeholder="مثال: +96599999999" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <div>
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition duration-200 shadow flex justify-center items-center gap-2">
-                        <span>ربط وتوليد رمز QR</span>
-                    </button>
-                </div>
-            </form>
+        <div id="status" class="status-box disconnected">
+            حالة الاتصال: جاري التحقق...
+        </div>
 
-            <!-- محاكاة ظهور QR Code بعد إدخال الرقم -->
-            <div id="qrContainer" class="hidden mt-6 p-6 bg-slate-900 rounded-xl border border-slate-700 text-center">
-                <div class="inline-block p-4 bg-white rounded-xl shadow mb-3">
-                    <!-- شكل توضيحي لـ QR Code -->
-                    <div class="w-40 h-40 bg-slate-900 flex items-center justify-center text-white text-xs font-mono rounded">
-                        [ QR CODE MOCK ]
-                    </div>
-                </div>
-                <p class="text-sm text-slate-400">افتح تطبيق واتساب على هاتفك > الأجهزة المرتبطة > اربط جهازاً، ثم امسح الرمز.</p>
-                <button type="button" onclick="simulateConnection()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-lg font-semibold transition">
-                    محاكاة نجاح الاتصال (للاختبار)
-                </button>
-            </div>
-        </section>
+        <div id="qr-container">
+            <p>حالة الخادم تعمل، راقب تيرمنال Render لرؤية رمز الـ QR أو تفقد التحديثات.</p>
+        </div>
 
-        <!-- الخطوة الثانية: إعدادات الذكاء الاصطناعي وتخصيص الردود (تظهر بعد الاتصال) -->
-        <section id="aiSettingsSection" class="bg-slate-800 rounded-2xl shadow-lg p-6 border border-slate-700 opacity-50 pointer-events-none transition-all duration-300">
-            <h2 class="text-xl font-bold text-emerald-400 mb-4 flex items-center gap-2">
-                <span>⚙️</span> الخطوة الثانية: تخصيص روبوت الرد الآلي (AI Persona)
-            </h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold mb-2 text-slate-300">طبيعة عمل النشاط أو الشركة</label>
-                    <input type="text" id="businessType" placeholder="مثال: شركة لبيع الأجهزة الإلكترونية وتقديم الدعم الفني" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-2 text-slate-300">تعليمات وشخصية الرد (System Prompt)</label>
-                    <textarea id="aiInstructions" rows="4" placeholder="اكتب للذكاء الاصطناعي كيف يجب أن يرد على العملاء، أسلوب الكلام، والمعلومات المتاحة لديه..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">أنت مساعد افتراضي ودود ومحترف لخدمة العملاء. أجب على استفسارات العملاء بدقة، وقدم الأسعار المتاحة، وكن متعاوناً دائماً باللغة العربية.</textarea>
-                </div>
-                <div class="flex justify-between items-center pt-2">
-                    <div class="flex items-center gap-3">
-                        <span class="relative flex h-3 w-3">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                        </span>
-                        <span class="text-sm text-slate-300">النظام جاهز لاستقبال رسائل الواتساب والرد عليها تلقائياً</span>
-                    </div>
-                    <button onclick="saveSettings()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition shadow">
-                        حفظ وتفعيل الرد الآلي
-                    </button>
-                </div>
-            </div>
-        </section>
+        <button onclick="checkStatus()">🔄 تحديث الحالة</button>
+    </div>
 
-    </main>
-
-    <!-- سكربت التفاعل البسيط -->
     <script>
-        document.getElementById('whatsappForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const phone = document.getElementById('phoneNumber').value;
-            if(!phone) return;
-            
-            // إظهار منطقة الـ QR عند إدخال الرقم
-            document.getElementById('qrContainer').classList.remove('hidden');
-        });
+        // رابط خادمك الفعلي على Render
+        const BACKEND_URL = 'https://whats-app-auto-replay.onrender.com';
 
-        function simulateConnection() {
-            // تفعيل قسم إعدادات الذكاء الاصطناعي وتغيير حالة الاتصال
-            const settingsSection = document.getElementById('aiSettingsSection');
-            settingsSection.classList.remove('opacity-50', 'pointer-events-none');
-            
-            const badge = document.getElementById('connectionBadge');
-            badge.className = "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5";
-            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> متصل بنجاح`;
-            
-            alert('تم ربط رقم الواتساب بنجاح! يمكنك الآن إعداد روبوت الذكاء الاصطناعي.');
+        async function checkStatus() {
+            const statusDiv = document.getElementById('status');
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/status`);
+                const data = await response.json();
+                
+                if (data.status === 'CONNECTED') {
+                    statusDiv.className = 'status-box connected';
+                    statusDiv.innerText = 'حالة الاتصال: متصل بنجاح ✅';
+                } else {
+                    statusDiv.className = 'status-box disconnected';
+                    statusDiv.innerText = 'حالة الاتصال: بانتظار مسح رمز QR ⏳';
+                }
+            } catch (error) {
+                statusDiv.className = 'status-box disconnected';
+                statusDiv.innerText = 'حالة الاتصال: خطأ في الاتصال بالخادم ❌';
+                console.error('خطأ في جلب الحالة:', error);
+            }
         }
 
-        function saveSettings() {
-            alert('تم حفظ إعدادات الذكاء الاصطناعي بنجاح، وبدء مراقبة رسائل الواتساب للرد عليها تلقائياً.');
-        }
+        // فحص الحالة تلقائياً كل 5 ثوانٍ
+        setInterval(checkStatus, 5000);
+        checkStatus();
     </script>
+
 </body>
 </html>
