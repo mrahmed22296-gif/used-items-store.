@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة روبوت الرد الآلي للواتساب</title>
+    <!-- مكتبة لترجمة نص الـ QR إلى صورة باركود مرئية -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <style>
         body {
             font-family: Tahoma, sans-serif;
@@ -47,6 +49,14 @@
             background: #fafafa;
             border: 1px dashed #ccc;
             border-radius: 8px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        canvas {
+            max-width: 100%;
         }
     </style>
 </head>
@@ -60,18 +70,21 @@
         </div>
 
         <div id="qr-container">
-            <p>حالة الخادم تعمل، راقب تيرمنال Render لرؤية رمز الـ QR أو تفقد التحديثات.</p>
+            <p id="qr-text">جاري جلب رمز الـ QR...</p>
+            <canvas id="qr-canvas"></canvas>
         </div>
 
         <button onclick="checkStatus()">🔄 تحديث الحالة</button>
     </div>
 
     <script>
-        // رابط خادمك الفعلي على Render
         const BACKEND_URL = 'https://whats-app-auto-replay.onrender.com';
 
         async function checkStatus() {
             const statusDiv = document.getElementById('status');
+            const qrText = document.getElementById('qr-text');
+            const canvas = document.getElementById('qr-canvas');
+
             try {
                 const response = await fetch(`${BACKEND_URL}/api/status`);
                 const data = await response.json();
@@ -79,18 +92,28 @@
                 if (data.status === 'CONNECTED') {
                     statusDiv.className = 'status-box connected';
                     statusDiv.innerText = 'حالة الاتصال: متصل بنجاح ✅';
+                    qrText.innerText = 'تم ربط الواتساب بنجاح، البوت يعمل الآن!';
+                    canvas.style.display = 'none';
                 } else {
                     statusDiv.className = 'status-box disconnected';
                     statusDiv.innerText = 'حالة الاتصال: بانتظار مسح رمز QR ⏳';
+                    
+                    if (data.qr) {
+                        qrText.innerText = 'امسح الرمز أدناه من تطبيق واتساب:';
+                        QRCode.toCanvas(canvas, data.qr, { width: 220 }, function (error) {
+                            if (error) console.error(error);
+                        });
+                    } else {
+                        qrText.innerText = 'جاري توليد رمز الـ QR من الخادم، انتظر قليلاً...';
+                    }
                 }
             } catch (error) {
                 statusDiv.className = 'status-box disconnected';
                 statusDiv.innerText = 'حالة الاتصال: خطأ في الاتصال بالخادم ❌';
-                console.error('خطأ في جلب الحالة:', error);
+                console.error('خطأ:', error);
             }
         }
 
-        // فحص الحالة تلقائياً كل 5 ثوانٍ
         setInterval(checkStatus, 5000);
         checkStatus();
     </script>
