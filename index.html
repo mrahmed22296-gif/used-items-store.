@@ -3,208 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة إدارة واهلاك الأصول الثابتة</title>
-    <!-- استدعاء Tailwind CSS للتصميم السريع والعصري -->
+    <title>منظومة الرد الذكي عبر واتساب - AI WhatsApp CRM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-        }
-        @media print {
-            body { background-color: white; }
-            no-print, header button, form, .no-print { display: none !important; }
-            .container { width: 100%; max-width: none; padding: 0; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid #cbd5e1; padding: 6px; font-size: 10pt; }
-        }
+        body { font-family: 'Cairo', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen">
+<body class="bg-slate-900 text-slate-100 min-h-screen">
 
-    <!-- شريط العناوين العلوي -->
-    <header class="bg-gradient-to-r from-blue-900 to-indigo-800 text-white shadow-md">
+    <!-- شريط التنقل العلوي -->
+    <header class="bg-slate-800 border-b border-slate-700 shadow-sm">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold">🏢 إدارة الأصول الثابتة وإهلاكها</h1>
-            <span class="bg-blue-700 text-xs px-3 py-1 rounded-full font-semibold">الإصدار 1.0</span>
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🤖</span>
+                <h1 class="text-lg font-bold text-white">نظام الرد الآلي بالذكاء الاصطناعي لـ واتساب</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="connectionBadge" class="bg-red-500/20 text-red-400 border border-red-500/30 text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> غير متصل
+                </span>
+            </div>
         </div>
     </header>
 
-    <main class="container mx-auto px-6 py-8">
+    <main class="container mx-auto px-6 py-8 max-w-5xl">
         
-        <!-- قسم إضافة أصل جديد -->
-        <section class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-slate-200 no-print">
-            <h2 class="text-lg font-bold text-blue-900 mb-4 border-b pb-2">➕ إضافة أصل جديد</h2>
-            <form id="assetForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold mb-1">وصف الأصل</label>
-                    <input type="text" id="assetName" required placeholder="مثال: أجهزة حاسب آلي للإدارة" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <!-- الخطوة الأولى: ربط رقم الهاتف -->
+        <section id="setupSection" class="bg-slate-800 rounded-2xl shadow-lg p-6 mb-8 border border-slate-700">
+            <h2 class="text-xl font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                <span>📱</span> الخطوة الأولى: ربط رقم الواتساب
+            </h2>
+            <form id="whatsappForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold mb-2 text-slate-300">رقم الهاتف (مع رمز الدولة)</label>
+                    <input type="text" id="phoneNumber" required placeholder="مثال: +96599999999" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold mb-1">تاريخ الشراء</label>
-                    <input type="date" id="purchaseDate" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1">تكلفة الاقتناء (ر.س)</label>
-                    <input type="number" id="assetCost" required placeholder="0.00" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1">القيمة التخريدية (ر.س)</label>
-                    <input type="number" id="salvageValue" required placeholder="0.00" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1">العمر الافتراضي (بالسنوات)</label>
-                    <input type="number" id="usefulLife" required placeholder="5" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1">طريقة الإهلاك</label>
-                    <select id="depMethod" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="straight">قسط ثابت (Straight-Line)</option>
-                    </select>
-                </div>
-                <div class="md:col-span-3 flex justify-end mt-2">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg text-sm transition duration-200 shadow">
-                        حفظ وإضافة الأصل للنظام
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition duration-200 shadow flex justify-center items-center gap-2">
+                        <span>ربط وتوليد رمز QR</span>
                     </button>
                 </div>
             </form>
+
+            <!-- محاكاة ظهور QR Code بعد إدخال الرقم -->
+            <div id="qrContainer" class="hidden mt-6 p-6 bg-slate-900 rounded-xl border border-slate-700 text-center">
+                <div class="inline-block p-4 bg-white rounded-xl shadow mb-3">
+                    <!-- شكل توضيحي لـ QR Code -->
+                    <div class="w-40 h-40 bg-slate-900 flex items-center justify-center text-white text-xs font-mono rounded">
+                        [ QR CODE MOCK ]
+                    </div>
+                </div>
+                <p class="text-sm text-slate-400">افتح تطبيق واتساب على هاتفك > الأجهزة المرتبطة > اربط جهازاً، ثم امسح الرمز.</p>
+                <button type="button" onclick="simulateConnection()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-lg font-semibold transition">
+                    محاكاة نجاح الاتصال (للاختبار)
+                </button>
+            </div>
         </section>
 
-        <!-- جدول الأصول الحالية -->
-        <section class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-4 border-b pb-2 gap-4">
-                <h2 class="text-lg font-bold text-blue-900">📋 سجل الأصول الثابتة وجداول الإهلاك</h2>
-                <!-- أزرار الاستخراج والتصدير -->
-                <div class="flex gap-2 no-print">
-                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1 shadow-sm">
-                        📊 استخراج Excel
-                    </button>
-                    <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition flex items-center gap-1 shadow-sm">
-                        📄 تصدير PDF / طباعة
+        <!-- الخطوة الثانية: إعدادات الذكاء الاصطناعي وتخصيص الردود (تظهر بعد الاتصال) -->
+        <section id="aiSettingsSection" class="bg-slate-800 rounded-2xl shadow-lg p-6 border border-slate-700 opacity-50 pointer-events-none transition-all duration-300">
+            <h2 class="text-xl font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                <span>⚙️</span> الخطوة الثانية: تخصيص روبوت الرد الآلي (AI Persona)
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-slate-300">طبيعة عمل النشاط أو الشركة</label>
+                    <input type="text" id="businessType" placeholder="مثال: شركة لبيع الأجهزة الإلكترونية وتقديم الدعم الفني" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-slate-300">تعليمات وشخصية الرد (System Prompt)</label>
+                    <textarea id="aiInstructions" rows="4" placeholder="اكتب للذكاء الاصطناعي كيف يجب أن يرد على العملاء، أسلوب الكلام، والمعلومات المتاحة لديه..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">أنت مساعد افتراضي ودود ومحترف لخدمة العملاء. أجب على استفسارات العملاء بدقة، وقدم الأسعار المتاحة، وكن متعاوناً دائماً باللغة العربية.</textarea>
+                </div>
+                <div class="flex justify-between items-center pt-2">
+                    <div class="flex items-center gap-3">
+                        <span class="relative flex h-3 w-3">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                        </span>
+                        <span class="text-sm text-slate-300">النظام جاهز لاستقبال رسائل الواتساب والرد عليها تلقائياً</span>
+                    </div>
+                    <button onclick="saveSettings()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition shadow">
+                        حفظ وتفعيل الرد الآلي
                     </button>
                 </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 text-slate-700 text-xs uppercase border-b">
-                            <th class="p-3">كود الأصل</th>
-                            <th class="p-3">اسم الأصل</th>
-                            <th class="p-3">تاريخ الشراء</th>
-                            <th class="p-3">التكلفة</th>
-                            <th class="p-3">العمر</th>
-                            <th class="p-3">مجمع الإهلاك السنوي</th>
-                            <th class="p-3">القيمة الدفترية</th>
-                            <th class="p-3 text-center no-print">الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assetsTableBody" class="text-sm divide-y divide-slate-100">
-                        <!-- تُضاف الصفوف برمجياً هنا -->
-                        <tr class="text-center text-slate-400">
-                            <td colspan="8" class="py-6">لا توجد أصول مضافة حالياً. ابدأ بإضافة أصل جديد.</td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </section>
 
     </main>
 
-    <!-- سكربت التشغيل وحساب الإهلاك والتصدير -->
+    <!-- سكربت التفاعل البسيط -->
     <script>
-        let assets = [];
-
-        document.getElementById('assetForm').addEventListener('submit', function(e) {
+        document.getElementById('whatsappForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            const phone = document.getElementById('phoneNumber').value;
+            if(!phone) return;
             
-            const name = document.getElementById('assetName').value;
-            const date = document.getElementById('purchaseDate').value;
-            const cost = parseFloat(document.getElementById('assetCost').value);
-            const salvage = parseFloat(document.getElementById('salvageValue').value);
-            const life = parseInt(document.getElementById('usefulLife').value);
-
-            const annualDepreciation = (cost - salvage) / life;
-            const currentBookValue = cost - annualDepreciation;
-
-            const newAsset = {
-                id: 'FA-' + Math.floor(1000 + Math.random() * 9000),
-                name,
-                date,
-                cost,
-                salvage,
-                life,
-                annualDepreciation: annualDepreciation.toFixed(2),
-                bookValue: currentBookValue.toFixed(2)
-            };
-
-            assets.push(newAsset);
-            renderTable();
-            this.reset();
+            // إظهار منطقة الـ QR عند إدخال الرقم
+            document.getElementById('qrContainer').classList.remove('hidden');
         });
 
-        function renderTable() {
-            const tbody = document.getElementById('assetsTableBody');
-            if (assets.length === 0) {
-                tbody.innerHTML = `<tr class="text-center text-slate-400"><td colspan="8" class="py-6">لا توجد أصول مضافة حالياً. ابدأ بإضافة أصل جديد.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = '';
-            assets.forEach((asset, index) => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-semibold text-blue-900">${asset.id}</td>
-                        <td class="p-3">${asset.name}</td>
-                        <td class="p-3">${asset.date}</td>
-                        <td class="p-3">${asset.cost.toLocaleString()} ر.س</td>
-                        <td class="p-3">${asset.life} سنوات</td>
-                        <td class="p-3 text-red-600">${asset.annualDepreciation} ر.س</td>
-                        <td class="p-3 font-bold text-emerald-600">${asset.bookValue} ر.س</td>
-                        <td class="p-3 text-center no-print">
-                            <button onclick="deleteAsset(${index})" class="bg-red-50 text-red-600 px-3 py-1 rounded text-xs hover:bg-red-100 transition">استبعاد / حذف</button>
-                        </td>
-                    </tr>
-                `;
-            });
+        function simulateConnection() {
+            // تفعيل قسم إعدادات الذكاء الاصطناعي وتغيير حالة الاتصال
+            const settingsSection = document.getElementById('aiSettingsSection');
+            settingsSection.classList.remove('opacity-50', 'pointer-events-none');
+            
+            const badge = document.getElementById('connectionBadge');
+            badge.className = "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5";
+            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> متصل بنجاح`;
+            
+            alert('تم ربط رقم الواتساب بنجاح! يمكنك الآن إعداد روبوت الذكاء الاصطناعي.');
         }
 
-        function deleteAsset(index) {
-            if(confirm('هل أنت متأكد من رغبتك في استبعاد هذا الأصل؟')) {
-                assets.splice(index, 1);
-                renderTable();
-            }
-        }
-
-        // دالة استخراج البيانات بصيغة إكسل (CSV)
-        function exportToExcel() {
-            if (assets.length === 0) {
-                alert('لا توجد بيانات لتصديرها!');
-                return;
-            }
-
-            let csvContent = "\uFEFFكود الأصل,اسم الأصل,تاريخ الشراء,التكلفة,العمر الافتراضي,الإهلاك السنوي,القيمة الدفترية\n";
-            assets.forEach(asset => {
-                csvContent += `${asset.id},"${asset.name}",${asset.date},${asset.cost},${asset.life},${asset.annualDepreciation},${asset.bookValue}\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Fixed_Assets_Schedule.csv';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        // دالة تصدير وطباعة PDF عبر متصفح الويب
-        function exportToPDF() {
-            if (assets.length === 0) {
-                alert('لا توجد بيانات لطباعتها!');
-                return;
-            }
-            window.print();
+        function saveSettings() {
+            alert('تم حفظ إعدادات الذكاء الاصطناعي بنجاح، وبدء مراقبة رسائل الواتساب للرد عليها تلقائياً.');
         }
     </script>
 </body>
